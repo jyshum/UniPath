@@ -15,10 +15,13 @@ SCHOOL_LOOKUP = {
     "ubc": "UBC Vancouver",
     "ubc ": "UBC Vancouver",
     "ubcv ": "UBC Vancouver",
+    "university of british columbia": "UBC Vancouver",
 
     # UBC Okanagan
     "ubco": "UBC Okanagan",
     "ubc okanagan": "UBC Okanagan",
+    "ubc-o": "UBC Okanagan",
+    "ubc v": "UBC Vancouver",
 
     # Simon Fraser University
     "sfu": "Simon Fraser University",
@@ -29,11 +32,16 @@ SCHOOL_LOOKUP = {
     "uvic": "University of Victoria",
     "u vic": "University of Victoria",
     "university of victoria": "University of Victoria",
+    "uvictoria": "University of Victoria",
+    "uvic (university of victoria)": "University of Victoria",
 
     # University of Alberta
     "uofa": "University of Alberta",
     "u of a": "University of Alberta",
     "university of alberta": "University of Alberta",
+    "alberta": "University of Alberta",
+    "ualberta": "University of Alberta",
+    "uofalberta": "University of Alberta",
 
     # University of Toronto
     "uoft": "University of Toronto",
@@ -43,6 +51,19 @@ SCHOOL_LOOKUP = {
     "uoft st. george": "University of Toronto",
     "u of t sg": "University of Toronto",
     "ut mississauga": "University of Toronto Mississauga",
+    "uoft sg": "University of Toronto",
+    "uoft sc": "University of Toronto Scarborough",
+    "uoft (toronto)": "University of Toronto",
+    "utsg": "University of Toronto",
+    "uoft - sg": "University of Toronto",
+    "uoft (st. george)": "University of Toronto",
+    "u of t (st. george - university college)": "University of Toronto",
+    "uoft st-george trinity college": "University of Toronto",
+    "uoft st. george victoria college": "University of Toronto",
+    "university of toronto (mississauga)": "University of Toronto Mississauga",
+    "utm": "University of Toronto Mississauga",
+    "uoft scarborough": "University of Toronto Scarborough",
+    "u of t (scarborough)": "University of Toronto Scarborough",
 
     # Western University
     "uwo": "Western University",
@@ -50,15 +71,23 @@ SCHOOL_LOOKUP = {
     "western ": "Western University",
     "western university": "Western University",
     "huron university (western)": "Western University",
+    "waterloo": "University of Waterloo",
+    "huron university (western)": "Western University",
+    "huron university": "Western University",
+    "huron university (western)": "Western University",
+
 
     # Queen's University
     "queens": "Queen's University",
     "queen's": "Queen's University",
     "queens university": "Queen's University",
+    "queen\u2019s": "Queen's University",  # curly apostrophe
+    "queen's": "Queen's University",        # straight apostrophe
 
     # University of Waterloo
     "waterloo": "University of Waterloo",
     "university of waterloo": "University of Waterloo",
+    "uwaterloo": "University of Waterloo",
 
     # McGill University
     "mcgill": "McGill University",
@@ -76,6 +105,9 @@ SCHOOL_LOOKUP = {
     # University of Calgary
     "university of calgary": "University of Calgary",
     "university of calgary ": "University of Calgary",
+    "ucalgary": "University of Calgary",
+    "uofc": "University of Calgary",
+    "ucalgary ": "University of Calgary",
 
     # Vancouver Island University
     "viu": "Vancouver Island University",
@@ -89,6 +121,8 @@ SCHOOL_LOOKUP = {
     "nipissing university": "Nipissing University",
     "wilfred laurier university": "Wilfrid Laurier University",
     "bow valley college": "Bow Valley College",
+    "kpu": "Kwantlen Polytechnic University",
+    "capilano university": "Capilano University",
 }
 
 PROVINCE_LOOKUP = {
@@ -154,27 +188,33 @@ def normalize_province(raw) -> str | None:
 
 
 def normalize_school(raw) -> tuple[str | None, bool]:
-    """
-    Normalizes a raw school name string.
-
-    Returns:
-        (normalized_name, multi_school_flag)
-        - normalized_name: canonical school name, or None if unparseable
-        - multi_school_flag: True if multiple schools were listed in one cell
-    """
     if pd.isna(raw) or str(raw).strip() == "":
         return None, False
 
     raw = str(raw).strip()
 
-    # Detect multiple schools — commas or slashes separating names
+    # Detect multiple schools — commas, slashes, or 3+ uppercase words
     separators = [",", "/"]
     is_multi = any(sep in raw for sep in separators)
 
-    # Always work with the first school mentioned
-    first = raw.split(",")[0].split("/")[0].strip()
+    # Also detect space-separated multi-school entries like "UBC SFU UVic"
+    # Heuristic: if there are 2+ known school abbreviations in the string
+    known_abbreviations = ["ubc", "sfu", "uvic", "uoft", "mcmaster", "queens", "western", "waterloo", "alberta"]
+    text_lower = raw.lower()
+    abbreviation_matches = sum(1 for abbr in known_abbreviations if abbr in text_lower)
+    if abbreviation_matches >= 2:
+        is_multi = True
+
+    # Extract first school — split on comma, slash, space, or parenthesis
+    import re
+    first = re.split(r'[,/(]', raw)[0].strip()
 
     normalized = SCHOOL_LOOKUP.get(first.lower())
+
+    # If first token didn't match, try just the first word
+    if normalized is None:
+        first_word = first.split()[0].strip().lower()
+        normalized = SCHOOL_LOOKUP.get(first_word)
 
     return normalized, is_multi
 
@@ -239,71 +279,89 @@ def normalize_decision(raw) -> str | None:
     
     return None
 
+domestic_pr_terms = {"canadian pr", "pr", "permanent resident"}
+
 def normalize_citizenship(raw) -> str | None:
 
     if pd.isna(raw) or str(raw).strip().upper() in ("N/A", "NA", ""):
         return None
 
-    raw = str(raw).strip().lower()
+    raw_stripped = str(raw).strip().lower()
 
+    # Exact match for short abbreviations and PR terms
     canadian_terms = {"canada", "canadian", "can", "ca"}
+    pr_terms = {"canadian pr", "pr", "permanent resident"}
 
-    if "canada" in raw or "canadian" in raw or raw in canadian_terms:
+    if raw_stripped in pr_terms:
         return "DOMESTIC"
-    
+    if "canada" in raw_stripped or "canadian" in raw_stripped:
+        return "DOMESTIC"
+    if raw_stripped in canadian_terms:
+        return "DOMESTIC"
+    # Dual citizenship with Canada — domestic
+    if "canada" in raw_stripped and "/" in raw_stripped:
+        return "DOMESTIC"
+
     return "INTERNATIONAL"
 
 def normalize_row(row: pd.Series) -> dict:
-    """
-    Applies all normalization functions to a single row.
-    Returns a dict of normalized values ready for the cleaned DataFrame.
-    """
     school_normalized, multi_school_flag = normalize_school(row.get("School "))
 
+    grade_11 = parse_average(row.get("Grade 11 average"))
+    grade_12 = parse_average(row.get("General grade 12 average"))
+    core = parse_average(row.get("Core average"))
+
+    # Impute core_avg if missing but other grades exist
+    if core is None:
+        available = [g for g in [grade_11, grade_12] if g is not None]
+        if available:
+            core = round(sum(available) / len(available), 2)
+
     return {
-        # Provenance
         "source": row.get("source"),
         "pulled_at": row.get("pulled_at"),
-
-        # School
         "school_raw": row.get("School "),
         "school_normalized": school_normalized,
         "multi_school_flag": multi_school_flag,
-
-        # Program
         "program_raw": row.get("Major/degree"),
-
-        # Decision
         "decision": normalize_decision(row.get("Final status")),
-
-        # Grades
-        "grade_11_avg": parse_average(row.get("Grade 11 average")),
-        "grade_12_avg": parse_average(row.get("General grade 12 average")),
-        "core_avg": parse_average(row.get("Core average")),
-
-        # Extracurriculars and circumstances (raw for now — Session 4 handles tagging)
+        "grade_11_avg": grade_11,
+        "grade_12_avg": grade_12,
+        "core_avg": core,
         "ec_raw": row.get("Extracurriculars/notable essay/interview topics"),
         "circumstances_raw": row.get("Special circumstances"),
-
-        # Location and citizenship
         "province": normalize_province(row.get("Province of residence")),
         "citizenship": normalize_citizenship(row.get("Country of citizenship")),
-
-        # Metadata
         "scholarship": row.get("Scholarship?"),
         "comments_raw": row.get("Additional comments?"),
     }
 
 
+BC_FETCHED_PATH = Path("data/processed/bc_fetched.csv")
+BC_2025_FETCHED_PATH = Path("data/processed/bc_2025_fetched.csv")
+BC_CLEANED_PATH = Path("data/cleaned/bc_cleaned.csv")
+
+
 def run():
     """
-    Reads bc_fetched.csv, normalizes every row, saves to bc_cleaned.csv.
-    Prints a summary of null counts per key field.
+    Reads all fetched CSVs, normalizes every row, saves to bc_cleaned.csv.
     """
-    print("Reading bc_fetched.csv...")
-    df = pd.read_csv(BC_FETCHED_PATH)
+    dfs = []
 
-    print(f"  {len(df)} rows to normalize")
+    if BC_FETCHED_PATH.exists():
+        print("Reading bc_fetched.csv...")
+        dfs.append(pd.read_csv(BC_FETCHED_PATH))
+
+    if BC_2025_FETCHED_PATH.exists():
+        print("Reading bc_2025_fetched.csv...")
+        dfs.append(pd.read_csv(BC_2025_FETCHED_PATH))
+
+    if not dfs:
+        print("No fetched files found. Run fetch_sheets.py first.")
+        return
+
+    df = pd.concat(dfs, ignore_index=True)
+    print(f"  {len(df)} total rows to normalize")
 
     normalized_rows = [normalize_row(row) for _, row in df.iterrows()]
     cleaned_df = pd.DataFrame(normalized_rows)
@@ -312,7 +370,6 @@ def run():
     cleaned_df.to_csv(BC_CLEANED_PATH, index=False)
     print(f"  Saved to {BC_CLEANED_PATH}")
 
-    # Summary — how many nulls per key field
     key_fields = [
         "school_normalized", "decision", "grade_11_avg",
         "grade_12_avg", "core_avg", "province", "citizenship"

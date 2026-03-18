@@ -62,9 +62,10 @@ def run():
     with Session(engine) as session:
         # Delete existing BC rows before re-inserting
         # This is the upsert strategy: clear and reload
-        deleted = session.query(Student).filter(Student.source == "BC").delete()
+        for source in ["BC", "BC_2025"]:
+            deleted = session.query(Student).filter(Student.source == source).delete()
         if deleted:
-            print(f"  Cleared {deleted} existing BC rows")
+            print(f"  Cleared {deleted} existing {source} rows")
 
         students = [row_to_student(row) for _, row in df.iterrows()]
         session.add_all(students)
