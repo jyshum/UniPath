@@ -5,9 +5,9 @@ import ollama
 import pandas as pd
 from datetime import datetime, timezone
 from pathlib import Path
-from sqlachemy.orm import Session
+from sqlalchemy.orm import Session
 
-from database.models import Student, inti_dev, get_engine
+from database.models import Student, init_db, get_engine
 from pipeline.normalize import normalize_row
 
 
@@ -16,13 +16,17 @@ HEADERS = {"User-Agent": "unipath-ai/1.0 (research project)"}
 SUBREDDITS = ["OntarioGrade12s", "BCGrade12s"]
 
 SEARCH_QUERIES = [
-    "accepeted average",
-    "rejected average",
-    "admission results",
-    "offer of admission",
-    "got in",
-    "decisions results"
+    "accepted engineering average",
+    "accepted computer science average",
+    "accepted commerce average",
+    "accepted science average",
+    "accepted arts average",
+    "UBC engineering accepted",
+    "Waterloo CS accepted",
+    "Ivey accepted average",
 ]
+
+VALID_DECISIONS = {"Accepted", "Rejected", "Waitlisted", "Deferred"}
 
 REQUEST_DELAY = 2
 
@@ -81,8 +85,8 @@ Extract the following fields if clearly present:
 Rules:
 - Return ONLY a valid JSON object, no explanation, no markdown
 - Return null for any field not clearly stated in the post
-- If the post contains no admissions data at all, return {"relevant": false}
-- If it does contain admissions data, include {"relevant": true}
+- If the post contains no admissions data at all, return {{"relevant": false}}
+- If it does contain admissions data, include {{"relevant": true}}
 
 Post text:
 {post_text}"""
@@ -123,47 +127,68 @@ def is_valid_extraction(data: dict) -> bool:
     """
     if not data.get("relevant"):
         return False
+    if isinstance(data.get("school"), list):
+        return False
+    if isinstance(data.get("decision"), list):
+        return False
+    if isinstance(data.get("core_avg"), list):
+        return False
     if not data.get("school"):
         return False
-    if not data.get("decision"):
+    if data.get("decision") not in VALID_DECISIONS:
         return False
-    if not data.get("core_avg") is None:
+    if data.get("core_avg") is None:
         return False
     return True
 
 def extraction_to_normalize_input(data: dict, subreddit: str) -> pd.Series:
-    """
-    converts extracted dict to a pandas series that matches
-    the scema normalize_row in normalize.py expects
-    """
+    def safe_str(val):
+        if val is None:
+            return None
+        if isinstance(val, list):
+            return val[0] if val else None
+        return str(val)
+
+    def safe_float(val):
+        try:
+            return float(val) if val is not None else None
+        except (TypeError, ValueError):
+            return None
+
     return pd.Series({
-        "School ": data.get("school"),
-        "Major/degree": data.get("program"),
-        "Final status": data.get("decision"),
+        "School ": safe_str(data.get("school")),
+        "Major/degree": safe_str(data.get("program")),
+        "Final status": safe_str(data.get("decision")),
         "Grade 11 average": None,
         "General grade 12 average": None,
-        "Core average": data.get("core_avg"),
-        "Extracurriculars/notable essay/interview topics": data.get("ec_raw"),
+        "Core average": safe_float(data.get("core_avg")),
+        "Extracurriculars/notable essay/interview topics": safe_str(data.get("ec_raw")),
         "Special circumstances": None,
-        "Province of residence": data.get("province"),
-        "Country of citizenship": data.get("citizenship"),
+        "Province of residence": safe_str(data.get("province")),
+        "Country of citizenship": safe_str(data.get("citizenship")),
         "Scholarship?": None,
         "Additional comments?": None,
         "source": "REDDIT_SCRAPED",
         "pulled_at": datetime.now(timezone.utc).isoformat(),
-
     })
 
-def load_student(normalized: dict, enginge) -> bool:
-    """
-    loads a single normalized row into the database.
-    returns True if inserted, False if skipped
-    """
+def load_student(normalized: dict, engine) -> bool:
     from pipeline.load_to_db import row_to_student
     row = pd.Series(normalized)
     student = row_to_student(row)
 
     with Session(engine) as session:
+        # Check for duplicate before inserting
+        existing = session.query(Student).filter(
+            Student.source == "REDDIT_SCRAPED",
+            Student.school_normalized == student.school_normalized,
+            Student.decision == student.decision,
+            Student.core_avg == student.core_avg,
+        ).first()
+
+        if existing:
+            return False
+
         session.add(student)
         session.commit()
     return True

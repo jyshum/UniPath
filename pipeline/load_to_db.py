@@ -62,6 +62,8 @@ def run():
     with Session(engine) as session:
         # Delete existing BC rows before re-inserting
         # This is the upsert strategy: clear and reload
+        # Note: REDDIT_SCRAPED rows are NOT cleared here intentionally.
+        # Run pipeline/reddit_agent.py separately to collect Reddit data.
         for source in ["BC", "BC_2025"]:
             deleted = session.query(Student).filter(Student.source == source).delete()
         if deleted:
