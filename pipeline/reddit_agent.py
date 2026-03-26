@@ -16,15 +16,6 @@ HEADERS = {"User-Agent": "unipath-ai/1.0 (research project)"}
 SUBREDDITS = ["OntarioGrade12s", "BCGrade12s"]
 
 SEARCH_QUERIES = [
-    # Generic admission queries
-    "accepted average",
-    "rejected average",
-    "admission results",
-    "offer of admission",
-    "got in",
-    "decisions results",
-    "waitlisted average",
-    "deferred average",
 
     # Engineering
     "accepted engineering",
@@ -121,6 +112,7 @@ def fetch_posts(subreddit: str, query: str, limit: int = 100) -> list[dict]:
         data = response.json()
     except Exception as e:
         print(f"    Failed to fetch r/{subreddit} query '{query}': {e}")
+        return []
 
     posts = []
     for post in data.get("data", {}).get("children", []):
@@ -149,29 +141,59 @@ def fetch_posts(subreddit: str, query: str, limit: int = 100) -> list[dict]:
 EXTRACTION_PROMPT = """You are extracting Canadian university admissions data from a Reddit post.
 
 Extract the following fields if clearly present:
-- school: university name as a string (e.g. "UBC", "University of Toronto") or null
-- program:  program or major name as a string or null. 
-  Infer from faculty names if present:
+- school: university name as a string (e.g. "UBC", "University of Toronto") or null.
+  If a faculty name implies a school (e.g. "Ivey" → "Western University", "Sauder" → "UBC"), extract both.
+- program: program or major name as a string or null.
+  You may infer program ONLY from faculty or program names explicitly present in the post:
   "Sauder" or "UBC Sauder" → "Commerce",
   "Ivey" or "Ivey AEO" → "Business Administration",
   "Schulich" → "Business",
   "Beedie" → "Business",
   "Rotman" → "Commerce",
-  "Engineering" or "Applied Science" → "Engineering",
-  "Health Sci" → "Health Sciences",
-  "Life Sci" → "Life Sciences",
-  "CompSci" or "CS" → "Computer Science"
-- decision: one of exactly "Accepted", "Rejected", "Waitlisted", "Deferred" or null
-- core_avg: numerical grade average as a float (e.g. 94.5) or null
-- ec_raw: extracurriculars mentioned as a string or null
-- province: Canadian province as a string or null
-- citizenship: country of citizenship as a string or null
+  "Engineering" or "Applied Science" or "APSC" → "Engineering",
+  "Health Sci" or "Health Sciences" → "Health Sciences",
+  "Life Sci" or "Life Sciences" → "Life Sciences",
+  "CompSci" or "CS" or "Computer Science" → "Computer Science",
+  "Nursing" → "Nursing",
+  "Pharmacy" → "Pharmacy",
+  "Kinesiology" or "Kin" → "Kinesiology",
+  "Biomed" or "Biomedical" → "Biomedical Sciences",
+  "Biochemistry" → "Biochemistry",
+  "Psychology" or "Psych" → "Psychology",
+  "Math" or "Mathematics" → "Mathematics",
+  "Physics" → "Physics",
+  "Economics" or "Econ" → "Economics",
+  "Architecture" → "Architecture",
+  "Education" → "Education",
+  "Law" → "Law",
+  "Arts" or "Humanities" → "Arts",
+  "Science" → "Science",
+  "Social Science" → "Social Sciences"
+  IMPORTANT: Only extract program if a program or faculty name is explicitly present in the post text.
+  Do NOT guess program from school name alone (e.g. "UBC" alone is not enough to extract a program).
+  Do NOT infer program from the search query or surrounding context.
+  If no program is mentioned, return null.
+- decision: one of exactly "Accepted", "Rejected", "Waitlisted", "Deferred" or null.
+  Do NOT extract decisions like "Expired", "Pending", "Conditional" — return null for these.
+- core_avg: the student's overall grade average as a float (e.g. 94.5) or null.
+  Do NOT extract IB total scores (e.g. 38/45) as a percentage — convert them: score/45*100.
+  If multiple averages are mentioned, extract the core or overall average, not subject-specific grades.
+  If the average is a percentage string like "94%", extract 94.0.
+- ec_raw: extracurriculars, clubs, sports, volunteering, or notable achievements as a string or null.
+  Only extract if explicitly mentioned. Do not fabricate.
+- province: Canadian province of the student as a string or null.
+  Only extract if explicitly stated. Do not infer from school location.
+- citizenship: country of citizenship as a string or null.
+  Only extract if explicitly stated.
 
 Rules:
-- Return ONLY a valid JSON object, no explanation, no markdown
+- Return ONLY a valid JSON object, no explanation, no markdown, no code fences
 - Return null for any field not clearly stated in the post
 - If the post contains no admissions data at all, return {{"relevant": false}}
 - If it does contain admissions data, include {{"relevant": true}}
+- A post is only relevant if it contains at minimum: a school, a decision, and a grade average
+- Do NOT extract data from hypothetical or question-based posts (e.g. "what are my chances?")
+- Do NOT extract data from posts asking for advice, only from posts reporting actual outcomes
 
 Post text:
 {post_text}"""
@@ -277,10 +299,28 @@ def load_student(normalized: dict, engine) -> bool:
         session.commit()
     return True
 
+PROGRESS_FILE = Path(__file__).parent.parent / "data" / "reddit_agent_progress.txt"
+
+def load_progress() -> set:
+    if not PROGRESS_FILE.exists():
+        return set()
+    return set(PROGRESS_FILE.read_text().strip().splitlines())
+
+
+def save_progress(key: str):
+    try:
+        PROGRESS_FILE.parent.mkdir(parents=True, exist_ok=True)
+        with open(PROGRESS_FILE, "a") as f:
+            f.write(key + "\n")
+        print(f"    [progress saved: {key}]")
+    except Exception as e:
+        print(f"    [progress save failed: {e}]")
+
 def run():
     """
     Fetches posts from target subreddits, extracts admissions data
     using Ollama, validates, normalizes, and loads to database.
+    Resumes from last completed query if interrupted.
     """
     print("=" * 50)
     print("Reddit Agent — Data Collection")
@@ -288,6 +328,7 @@ def run():
 
     engine = init_db()
     seen_ids = set()
+    completed = load_progress()
 
     total_fetched = 0
     total_extracted = 0
@@ -297,6 +338,12 @@ def run():
         print(f"\nScraping r/{subreddit}...")
 
         for query in SEARCH_QUERIES:
+            key = f"{subreddit}::{query}"
+
+            if key in completed:
+                print(f"  Skipping '{query}' (already done)")
+                continue
+
             print(f"  Query: '{query}'")
             posts = fetch_posts(subreddit, query, limit=100)
             print(f"    Fetched {len(posts)} posts")
@@ -326,9 +373,12 @@ def run():
                 try:
                     load_student(normalized, engine)
                     total_loaded += 1
-                    print(f"    ✓ {data.get('school')} | {data.get('decision')} | {data.get('core_avg')}")
+                    print(f"    ✓ {data.get('school')} | {data.get('program')} | {data.get('decision')} | {data.get('core_avg')}")
                 except Exception as e:
                     print(f"    ✗ Load failed: {e}")
+
+            # Mark query as complete after all posts processed
+            save_progress(key)
 
     print(f"\n{'=' * 50}")
     print(f"Agent complete.")
