@@ -13,3 +13,108 @@ OntarioGrade12s::rejected computer science
 OntarioGrade12s::CS accepted
 OntarioGrade12s::CompSci accepted
 OntarioGrade12s::got into CS
+OntarioGrade12s::computer science offer
+OntarioGrade12s::CS rejection
+OntarioGrade12s::math CS accepted
+OntarioGrade12s::accepted commerce
+OntarioGrade12s::Sauder accepted
+OntarioGrade12s::Ivey accepted
+OntarioGrade12s::Schulich accepted
+OntarioGrade12s::Beedie accepted
+OntarioGrade12s::Rotman accepted
+OntarioGrade12s::HBA accepted
+OntarioGrade12s::BBA accepted
+OntarioGrade12s::got into business
+OntarioGrade12s::commerce rejection
+OntarioGrade12s::Ivey AEO
+OntarioGrade12s::accepted science
+OntarioGrade12s::life sciences accepted
+OntarioGrade12s::health sciences accepted
+OntarioGrade12s::rejected science
+OntarioGrade12s::got into science
+OntarioGrade12s::biomed accepted
+OntarioGrade12s::biochemistry accepted
+OntarioGrade12s::kinesiology accepted
+OntarioGrade12s::nursing accepted
+OntarioGrade12s::pharmacy accepted
+OntarioGrade12s::health sci accepted
+OntarioGrade12s::McMaster health sci
+OntarioGrade12s::rejected health sciences
+OntarioGrade12s::physiotherapy accepted
+OntarioGrade12s::accepted arts
+OntarioGrade12s::social sciences accepted
+OntarioGrade12s::got into arts
+OntarioGrade12s::rejected arts
+OntarioGrade12s::psychology accepted
+OntarioGrade12s::UBC science accepted
+OntarioGrade12s::UBC engineering accepted
+OntarioGrade12s::UBC Sauder accepted
+OntarioGrade12s::Waterloo CS accepted
+OntarioGrade12s::Waterloo math accepted
+OntarioGrade12s::Waterloo engineering accepted
+OntarioGrade12s::McMaster life sci accepted
+OntarioGrade12s::McMaster health sci accepted
+OntarioGrade12s::UofT engineering accepted
+OntarioGrade12s::UofT life sci accepted
+OntarioGrade12s::Queens engineering accepted
+OntarioGrade12s::Western Ivey accepted
+BCGrade12s::accepted engineering
+BCGrade12s::rejected engineering
+BCGrade12s::engineering admission
+BCGrade12s::applied science accepted
+BCGrade12s::got into engineering
+BCGrade12s::engineering offer
+BCGrade12s::ECE accepted
+BCGrade12s::software engineering accepted
+BCGrade12s::mechanical engineering accepted
+BCGrade12s::chemical engineering accepted
+BCGrade12s::accepted computer science
+BCGrade12s::rejected computer science
+BCGrade12s::CS accepted
+BCGrade12s::CompSci accepted
+BCGrade12s::got into CS
+BCGrade12s::computer science offer
+BCGrade12s::CS rejection
+BCGrade12s::math CS accepted
+BCGrade12s::accepted commerce
+BCGrade12s::Sauder accepted
+BCGrade12s::Ivey accepted
+BCGrade12s::Schulich accepted
+BCGrade12s::Beedie accepted
+BCGrade12s::Rotman accepted
+BCGrade12s::HBA accepted
+BCGrade12s::BBA accepted
+BCGrade12s::got into business
+BCGrade12s::commerce rejection
+BCGrade12s::Ivey AEO
+BCGrade12s::accepted science
+BCGrade12s::life sciences accepted
+BCGrade12s::health sciences accepted
+BCGrade12s::rejected science
+BCGrade12s::got into science
+BCGrade12s::biomed accepted
+BCGrade12s::biochemistry accepted
+BCGrade12s::kinesiology accepted
+BCGrade12s::nursing accepted
+BCGrade12s::pharmacy accepted
+BCGrade12s::health sci accepted
+BCGrade12s::McMaster health sci
+BCGrade12s::rejected health sciences
+BCGrade12s::physiotherapy accepted
+BCGrade12s::accepted arts
+BCGrade12s::social sciences accepted
+BCGrade12s::got into arts
+BCGrade12s::rejected arts
+BCGrade12s::psychology accepted
+BCGrade12s::UBC science accepted
+BCGrade12s::UBC engineering accepted
+BCGrade12s::UBC Sauder accepted
+BCGrade12s::Waterloo CS accepted
+BCGrade12s::Waterloo math accepted
+BCGrade12s::Waterloo engineering accepted
+BCGrade12s::McMaster life sci accepted
+BCGrade12s::McMaster health sci accepted
+BCGrade12s::UofT engineering accepted
+BCGrade12s::UofT life sci accepted
+BCGrade12s::Queens engineering accepted
+BCGrade12s::Western Ivey accepted

@@ -9,120 +9,310 @@ BC_FETCHED_PATH = Path("data/processed/bc_fetched.csv")
 BC_CLEANED_PATH = Path("data/cleaned/bc_cleaned.csv")
 
 SCHOOL_LOOKUP = {
+    # -------------------------
     # UBC Vancouver
-    "ubcv": "UBC Vancouver",
-    "ubc vancouver": "UBC Vancouver",
+    # -------------------------
     "ubc": "UBC Vancouver",
     "ubc ": "UBC Vancouver",
+    "ubcv": "UBC Vancouver",
     "ubcv ": "UBC Vancouver",
+    "ubc vancouver": "UBC Vancouver",
     "university of british columbia": "UBC Vancouver",
+    "ubc v": "UBC Vancouver",
+    # UBC faculty names → UBC Vancouver
+    "sauder": "UBC Vancouver",
+    "ubc sauder": "UBC Vancouver",
+    "sauder school of business": "UBC Vancouver",
 
+    # -------------------------
     # UBC Okanagan
+    # -------------------------
     "ubco": "UBC Okanagan",
     "ubc okanagan": "UBC Okanagan",
     "ubc-o": "UBC Okanagan",
-    "ubc v": "UBC Vancouver",
 
+    # -------------------------
     # Simon Fraser University
+    # -------------------------
     "sfu": "Simon Fraser University",
     "simon fraser": "Simon Fraser University",
     "simon fraser university": "Simon Fraser University",
+    # SFU faculty names
+    "beedie": "Simon Fraser University",
+    "sfu beedie": "Simon Fraser University",
 
+    # -------------------------
     # University of Victoria
+    # -------------------------
     "uvic": "University of Victoria",
     "u vic": "University of Victoria",
     "university of victoria": "University of Victoria",
     "uvictoria": "University of Victoria",
     "uvic (university of victoria)": "University of Victoria",
 
+    # -------------------------
     # University of Alberta
+    # -------------------------
     "uofa": "University of Alberta",
     "u of a": "University of Alberta",
+    "u of alberta": "University of Alberta",
     "university of alberta": "University of Alberta",
     "alberta": "University of Alberta",
     "ualberta": "University of Alberta",
     "uofalberta": "University of Alberta",
 
+    # -------------------------
     # University of Toronto
+    # -------------------------
     "uoft": "University of Toronto",
     "u of t": "University of Toronto",
     "university of toronto": "University of Toronto",
-    "university of toronto (st. george)": "University of Toronto",
-    "uoft st. george": "University of Toronto",
-    "u of t sg": "University of Toronto",
-    "ut mississauga": "University of Toronto Mississauga",
-    "uoft sg": "University of Toronto",
-    "uoft sc": "University of Toronto Scarborough",
-    "uoft (toronto)": "University of Toronto",
     "utsg": "University of Toronto",
+    "uoft sg": "University of Toronto",
     "uoft - sg": "University of Toronto",
+    "uoft (toronto)": "University of Toronto",
     "uoft (st. george)": "University of Toronto",
+    "u of t sg": "University of Toronto",
     "u of t (st. george - university college)": "University of Toronto",
     "uoft st-george trinity college": "University of Toronto",
     "uoft st. george victoria college": "University of Toronto",
-    "university of toronto (mississauga)": "University of Toronto Mississauga",
+    "university of toronto (st. george)": "University of Toronto",
+    "uoft st. george": "University of Toronto",
+    # UofT faculty names → University of Toronto
+    "rotman": "University of Toronto",
+    "rotman commerce": "University of Toronto",
+    "innis": "University of Toronto",
+    "victoria college uoft": "University of Toronto",
+    "trinity college uoft": "University of Toronto",
+    "engsci": "University of Toronto",
+    "uoft engsci": "University of Toronto",
+
+    # UofT Mississauga
     "utm": "University of Toronto Mississauga",
+    "ut mississauga": "University of Toronto Mississauga",
+    "university of toronto mississauga": "University of Toronto Mississauga",
+    "university of toronto (mississauga)": "University of Toronto Mississauga",
+
+    # UofT Scarborough
+    "utsc": "University of Toronto Scarborough",
+    "uoft sc": "University of Toronto Scarborough",
     "uoft scarborough": "University of Toronto Scarborough",
     "u of t (scarborough)": "University of Toronto Scarborough",
 
+    # -------------------------
     # Western University
+    # -------------------------
     "uwo": "Western University",
     "western": "Western University",
     "western ": "Western University",
     "western university": "Western University",
-    "huron university (western)": "Western University",
-    "waterloo": "University of Waterloo",
-    "huron university (western)": "Western University",
+    "university of western ontario": "Western University",
+    # Western faculty names
+    "ivey": "Western University",
+    "ivey aeo": "Western University",
+    "ivey business school": "Western University",
     "huron university": "Western University",
     "huron university (western)": "Western University",
+    "western huron": "Western University",
+    "kings university college": "Western University",
 
-
+    # -------------------------
     # Queen's University
+    # -------------------------
     "queens": "Queen's University",
     "queen's": "Queen's University",
     "queens university": "Queen's University",
-    "queen\u2019s": "Queen's University",  # curly apostrophe
-    "queen's": "Queen's University",        # straight apostrophe
+    "queen\u2019s": "Queen's University",
+    "queens smith engineering": "Queen's University",
+    # Queen's faculty names
+    "smith": "Queen's University",
+    "smith school of business": "Queen's University",
+    "queens smith": "Queen's University",
 
+    # -------------------------
     # University of Waterloo
+    # -------------------------
     "waterloo": "University of Waterloo",
     "university of waterloo": "University of Waterloo",
     "uwaterloo": "University of Waterloo",
+    "uw": "University of Waterloo",
+    "uw cs": "University of Waterloo",
+    "waterloo university": "University of Waterloo",
 
+    # -------------------------
     # McGill University
+    # -------------------------
     "mcgill": "McGill University",
     "mcgill university": "McGill University",
+    # McGill faculty names
+    "desautels": "McGill University",
+    "desautels faculty of management": "McGill University",
+    "macdonald university": "McGill University",
+    "macdonald": "McGill University",
 
+    # -------------------------
     # McMaster University
+    # -------------------------
     "mcmaster": "McMaster University",
     "mcmaster university": "McMaster University",
     "mcmaster univeristy": "McMaster University",
+    # McMaster faculty names
+    "degroote": "McMaster University",
+    "degroote school of business": "McMaster University",
 
+    # -------------------------
+    # York University
+    # -------------------------
+    "york": "York University",
+    "york university": "York University",
+    # York faculty names
+    "schulich": "York University",
+    "schulich school of business": "York University",
+    "lassonde": "York University",
+    "lassonde school of engineering": "York University",
+    "glendon": "York University",
+
+    # -------------------------
+    # Toronto Metropolitan University
+    # -------------------------
+    "tmu": "Toronto Metropolitan University",
+    "toronto metropolitan university": "Toronto Metropolitan University",
+    "ryerson": "Toronto Metropolitan University",
+
+    # -------------------------
+    # University of Ottawa
+    # -------------------------
+    "uottawa": "University of Ottawa",
+    "university of ottawa": "University of Ottawa",
+    "ottawa u": "University of Ottawa",
+    "u of ottawa": "University of Ottawa",
+
+    # -------------------------
+    # Carleton University
+    # -------------------------
+    "carleton": "Carleton University",
+    "carleton university": "Carleton University",
+    # Carleton faculty names
+    "sprott": "Carleton University",
+    "sprott school of business": "Carleton University",
+
+    # -------------------------
+    # University of Calgary
+    # -------------------------
+    "ucalgary": "University of Calgary",
+    "university of calgary": "University of Calgary",
+    "university of calgary ": "University of Calgary",
+    "uofc": "University of Calgary",
+    "uofc ": "University of Calgary",
+    # Calgary faculty names
+    "haskayne": "University of Calgary",
+    "haskayne school of business": "University of Calgary",
+
+    # -------------------------
     # University of Saskatchewan
+    # -------------------------
     "usask": "University of Saskatchewan",
     "university of saskatchewan": "University of Saskatchewan",
 
-    # University of Calgary
-    "university of calgary": "University of Calgary",
-    "university of calgary ": "University of Calgary",
-    "ucalgary": "University of Calgary",
-    "uofc": "University of Calgary",
-    "ucalgary ": "University of Calgary",
+    # -------------------------
+    # Wilfrid Laurier University
+    # -------------------------
+    "laurier": "Wilfrid Laurier University",
+    "wilfrid laurier university": "Wilfrid Laurier University",
+    "wilfred laurier university": "Wilfrid Laurier University",
+    "laurier health sci": "Wilfrid Laurier University",
+    # Laurier faculty names
+    "lazaridis": "Wilfrid Laurier University",
+    "lazaridis school of business": "Wilfrid Laurier University",
 
+    # -------------------------
+    # University of Guelph
+    # -------------------------
+    "guelph": "University of Guelph",
+    "university of guelph": "University of Guelph",
+
+    # -------------------------
+    # Ontario Tech University
+    # -------------------------
+    "ontario tech": "Ontario Tech University",
+    "ontario tech university": "Ontario Tech University",
+    "otech": "Ontario Tech University",
+
+    # -------------------------
+    # MacEwan University
+    # -------------------------
+    "macewan": "MacEwan University",
+    "macewan university": "MacEwan University",
+
+    # -------------------------
     # Vancouver Island University
+    # -------------------------
     "viu": "Vancouver Island University",
     "viu, nanaimo": "Vancouver Island University",
 
-    # Other
+    # -------------------------
+    # BCIT
+    # -------------------------
     "bcit": "BCIT",
     "bcit - burnaby": "BCIT",
-    "carleton university": "Carleton University",
-    "uottawa": "University of Ottawa",
+
+    # -------------------------
+    # Nipissing University
+    # -------------------------
     "nipissing university": "Nipissing University",
-    "wilfred laurier university": "Wilfrid Laurier University",
+    "nipissing": "Nipissing University",
+
+    # -------------------------
+    # Bow Valley College
+    # -------------------------
     "bow valley college": "Bow Valley College",
+    "bow valley": "Bow Valley College",
+
+    # -------------------------
+    # Kwantlen Polytechnic University
+    # -------------------------
     "kpu": "Kwantlen Polytechnic University",
+    "kwantlen": "Kwantlen Polytechnic University",
+
+    # -------------------------
+    # Capilano University
+    # -------------------------
     "capilano university": "Capilano University",
+    "capilano": "Capilano University",
+
+    # -------------------------
+    # Dalhousie University
+    # -------------------------
+    "dal": "Dalhousie University",
+    "dalhousie": "Dalhousie University",
+    "dalhousie university": "Dalhousie University",
+
+    # -------------------------
+    # University of Manitoba
+    # -------------------------
+    "umanitoba": "University of Manitoba",
+    "university of manitoba": "University of Manitoba",
+    "manitoba": "University of Manitoba",
+
+    # -------------------------
+    # University of New Brunswick
+    # -------------------------
+    "unb": "University of New Brunswick",
+    "university of new brunswick": "University of New Brunswick",
+
+    # -------------------------
+    # Concordia University
+    # -------------------------
+    "concordia": "Concordia University",
+    "concordia university": "Concordia University",
+    "john molson": "Concordia University",
+    "john molson school of business": "Concordia University",
+
+    # -------------------------
+    # University of Regina
+    # -------------------------
+    "uregina": "University of Regina",
+    "university of regina": "University of Regina",
 }
 
 PROVINCE_LOOKUP = {

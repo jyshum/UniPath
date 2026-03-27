@@ -9,6 +9,8 @@ from sqlalchemy.orm import Session
 
 from database.models import Student, init_db, get_engine
 from pipeline.normalize import normalize_row
+from pipeline.normalize import normalize_school
+from pipeline.extract_fields import extract_row
 
 
 HEADERS = {"User-Agent": "unipath-ai/1.0 (research project)"}
@@ -241,10 +243,24 @@ def is_valid_extraction(data: dict) -> bool:
         return False
     if data.get("decision") not in VALID_DECISIONS:
         return False
-    if data.get("core_avg") is None:
-        return False
     if not data.get("program"):
         return False
+
+    # Grade range validation
+    core_avg = data.get("core_avg")
+    if core_avg is None:
+        return False
+    try:
+        if not (50.0 <= float(core_avg) <= 100.0):
+            return False
+    except (TypeError, ValueError):
+        return False
+
+    # Reject if school doesn't normalize to a known Canadian school
+    school_normalized, _ = normalize_school(str(data.get("school")).strip())
+    if school_normalized is None:
+        return False
+
     return True
 
 def extraction_to_normalize_input(data: dict, subreddit: str) -> pd.Series:
@@ -369,11 +385,22 @@ def run():
                 raw_series = extraction_to_normalize_input(data, subreddit)
                 normalized = normalize_row(raw_series)
 
+                # Extract tags and program category
+                normalized_series = pd.Series(normalized)
+                extracted = extract_row(normalized_series)
+
+                # Convert tag lists to JSON strings for database storage
+                import json
+                if isinstance(extracted.get("ec_tags"), list):
+                    extracted["ec_tags"] = json.dumps(extracted["ec_tags"])
+                if isinstance(extracted.get("circumstance_tags"), list):
+                    extracted["circumstance_tags"] = json.dumps(extracted["circumstance_tags"])
+
                 # Load
                 try:
-                    load_student(normalized, engine)
+                    load_student(extracted, engine)
                     total_loaded += 1
-                    print(f"    ✓ {data.get('school')} | {data.get('program')} | {data.get('decision')} | {data.get('core_avg')}")
+                    print(f"    ✓ {extracted.get('school_normalized')} | {extracted.get('program_raw')} | {extracted.get('program_category')} | {extracted.get('decision')} | {extracted.get('core_avg')}")
                 except Exception as e:
                     print(f"    ✗ Load failed: {e}")
 
