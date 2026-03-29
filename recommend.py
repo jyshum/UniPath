@@ -4,6 +4,7 @@ import json
 import sqlite3
 import pandas as pd
 from pathlib import Path
+import calibrate
 
 DB_PATH = "database/unipath.db"
 DEFAULT_TOLERANCE = 2.0
@@ -84,6 +85,9 @@ def lookup_school(
             f"Not enough data at ±{tolerance}. "
             f"Widened search to ±{used_tolerance} to find more results."
         )
+    result["acceptance_probability"] = calibrate.calibrated_probability(
+        school, program_category, grade, tolerance
+    )
     return result
 
 

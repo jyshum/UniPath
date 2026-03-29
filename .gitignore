@@ -9,4 +9,5 @@ __pycache__/
 credentials.json
 .gitattributes
 reccommend.py
-app.py
+.pytest_cache/
+test_calibrate_smoke.py

@@ -95,6 +95,22 @@ if search:
             f"within ±{tolerance} of {grade} applying to {program}."
         )
 
+        # Calibrated acceptance likelihood
+        ap = result.get("acceptance_probability")
+        if ap is not None:
+            prob_pct = f"{ap['probability'] * 100:.0f}%"
+            st.metric(label="Calibrated acceptance likelihood", value=prob_pct)
+            st.caption(
+                f"Confidence: **{ap['confidence']}** · "
+                f"{ap['n_accepted']} accepted / {ap['n_rejected']} rejected students "
+                f"within ±{ap['tolerance_used']} of your grade · "
+                f"Anchored to {ap['base_rate'] * 100:.0f}% published acceptance rate."
+            )
+            st.info(
+                f"~{prob_pct} of similar students with your grade profile were accepted "
+                f"to {school} {program}. This is directional, not a prediction of your individual outcome."
+            )
+
         # Build results table
         rows = []
         for b in result["breakdown"]:

@@ -199,41 +199,78 @@ def tag_program(raw) -> str:
     if is_empty_response(raw):
         return "OTHER"
 
-    text = str(raw).lower()
+    text = str(raw).lower().strip()
 
-    if any(kw in text for kw in ["computer science", "computing", 
-                                 "software", "comp sci", "cs"]):
-        return "COMPUTER_SCIENCE"
-    if any(kw in text for kw in ["engineering", "applied science", 
-                                 "apsc", "mechanical", "electrical", 
-                                 "civil", "chemical", "biomedical", 
-                                 "mechatronics", "aerospace"]):
-        return "ENGINEERING"
-    if any(kw in text for kw in ["business", "commerce", "bcom", 
-                                 "bba", "accounting", "finance", 
-                                 "marketing", "economics", "sauder", 
-                                 "rotman", "ivey", "management"]):
-        return "BUSINESS"
-    if any(kw in text for kw in ["medicine", "nursing", "pharmacy", 
-                                 "health", "medical", "pre-med", 
-                                 "physiotherapy", "dentistry", 
-                                 "kinesiology", "biomedical physiology", 
-                                 "anatomy"]):
+    # HEALTH — check before SCIENCE to avoid biomed/life sci going to SCIENCE
+    if any(kw in text for kw in [
+        "nursing", "pharmacy", "kinesiology", "kinetics", "physiotherapy",
+        "dentistry", "medicine", "medical", "health sci", "health science",
+        "health information", "biomed", "biomedical", "ibiomed", "i-biomed",
+        "medical radiation", "med rad", "midwifery", "nutrition", "food",
+        "pre-med", "radiation science", "biomedical physiology",
+    ]):
         return "HEALTH"
-    if any(kw in text for kw in ["science", "biology", "chemistry", 
-                                 "physics", "math", "statistics", 
-                                 "biochemistry", "neuroscience", 
-                                 "life science", "bioscience"]):
-        return "SCIENCE"
-    if any(kw in text for kw in ["law", "legal", "criminology", "justice"]):
-        return "LAW"
-    if any(kw in text for kw in ["education", "teaching", "teacher", "bed", "pedagogy"]):
-        return "EDUCATION"
-    if any(kw in text for kw in ["arts", "humanities", "english", "history", 
-                                 "psychology", "sociology", "philosophy", 
-                                 "political science", "geography", "gender", 
-                                 "film", "social science"]):
+
+    # ENGINEERING — check before SCIENCE to avoid applied science going to SCIENCE
+    if any(kw in text for kw in [
+        "engineering", "applied science", "apsc", "mechanical", "electrical",
+        "civil", "chemical", "bioengineering", "mechatronics", "aerospace",
+        "software eng", "soft eng", "comp eng", "mech eng", "engsci",
+        "eng sci", "nuclear", "environmental engineering", "architecture",
+        "computer engineering", "systems design",
+    ]):
+        return "ENGINEERING"
+
+    # COMPUTER_SCIENCE — check before SCIENCE
+    if any(kw in text for kw in [
+        "computer science", "computing", "software", "comp sci", "cs",
+        "cyber security", "cybersecurity", "data science", "artificial intelligence",
+        "machine learning", "information technology", "computer engineering",
+    ]):
+        # Exclude false positives
+        if "political science" in text or "social science" in text:
+            pass
+        else:
+            return "COMPUTER_SCIENCE"
+
+    # BUSINESS — check before ARTS to avoid economics going to ARTS
+    if any(kw in text for kw in [
+        "business", "commerce", "bcom", "bba", "accounting", "finance",
+        "marketing", "management", "sauder", "suader", "rotman", "ivey",
+        "schulich", "beedie", "lazaridis", "economics", "econ",
+        "actuarial", "bmos", "bmobs", "afm", "hba",
+        "sprott", "desautels", "haskayne", "degroote",
+    ]):
+        return "BUSINESS"
+
+    # ARTS
+    if any(kw in text for kw in [
+        "arts", "humanities", "english", "history", "philosophy",
+        "political science", "sociology", "geography", "gender",
+        "film", "social science", "communication", "journalism",
+        "media", "design", "interaction design", "planning",
+        "criminology", "anthropology", "linguistics", "psychology",
+        "diaspora", "semiotics", "broadcasting",
+    ]):
         return "ARTS"
+
+    # SCIENCE — broad catch after all above
+    if any(kw in text for kw in [
+        "science", "biology", "chemistry", "physics", "math",
+        "statistics", "biochemistry", "neuroscience", "life science",
+        "bioscience", "molecular", "ecology", "forensic", "anatomy",
+        "environmental science", "cell biology", "animal",
+        "pharmaceutical science", "bsc", "isci", "general sci",
+    ]):
+        return "SCIENCE"
+
+    # LAW
+    if any(kw in text for kw in ["law", "legal", "jd", "llb"]):
+        return "LAW"
+
+    # EDUCATION
+    if any(kw in text for kw in ["education", "teaching", "teacher", "bed"]):
+        return "EDUCATION"
 
     # spaCy fallback
     doc = nlp(str(raw))
