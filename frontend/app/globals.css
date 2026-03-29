@@ -1,0 +1,91 @@
+@import "tailwindcss";
+
+/* ── Theme ─────────────────────────────────────────────────────────────── */
+@theme {
+  --color-bg:            #0a0a0a;
+  --color-surface:       #141414;
+  --color-surface-2:     #1c1c1c;
+  --color-border:        rgba(255, 255, 255, 0.08);
+  --color-border-strong: rgba(255, 255, 255, 0.16);
+  --color-text:          #f5f5f0;
+  --color-muted:         rgba(245, 245, 240, 0.45);
+  --color-accent:        #3b82f6;
+  --color-accent-dim:    rgba(59, 130, 246, 0.15);
+  --color-amber:         #f59e0b;
+  --color-amber-dim:     rgba(245, 158, 11, 0.15);
+
+  --font-display: var(--font-dm-serif), "Georgia", serif;
+  --font-sans:    var(--font-dm-sans), system-ui, sans-serif;
+}
+
+/* ── Base ──────────────────────────────────────────────────────────────── */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+  background-color: #0a0a0a;
+  color: #f5f5f0;
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ── Grain overlay ─────────────────────────────────────────────────────── */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  opacity: 0.032;
+  pointer-events: none;
+  z-index: 9999;
+}
+
+/* ── Animations ────────────────────────────────────────────────────────── */
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes breathe {
+  0%, 100% { opacity: 0.25; transform: scale(1); }
+  50%       { opacity: 0.55; transform: scale(1.03); }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 40px rgba(59, 130, 246, 0.15); }
+  50%       { box-shadow: 0 0 80px rgba(59, 130, 246, 0.35); }
+}
+
+.animate-fade-up   { animation: fade-up  0.45s cubic-bezier(0.16, 1, 0.3, 1) both; }
+.animate-fade-in   { animation: fade-in  0.35s ease both; }
+.animate-breathe   { animation: breathe  3s ease-in-out infinite; }
+.animate-pulse-glow { animation: pulse-glow 3s ease-in-out infinite; }
+
+.delay-100 { animation-delay: 100ms; }
+.delay-200 { animation-delay: 200ms; }
+.delay-300 { animation-delay: 300ms; }
+.delay-400 { animation-delay: 400ms; }
+.delay-500 { animation-delay: 500ms; }
+
+/* ── Scrollbar ──────────────────────────────────────────────────────────── */
+::-webkit-scrollbar            { width: 4px; height: 4px; }
+::-webkit-scrollbar-track      { background: transparent; }
+::-webkit-scrollbar-thumb      { background: rgba(255,255,255,0.12); border-radius: 2px; }
+::-webkit-scrollbar-thumb:hover{ background: rgba(255,255,255,0.22); }
+
+/* ── Focus visible ──────────────────────────────────────────────────────── */
+:focus-visible {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
