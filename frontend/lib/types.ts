@@ -25,6 +25,13 @@ export interface BaseProbabilityResult {
   data_limited: boolean
 }
 
+export interface SimilarStudents {
+  count:     number
+  avg_grade: number
+  min_grade: number
+  max_grade: number
+}
+
 export interface FinalProbabilityResult {
   probability: number
   display_percent: string
@@ -38,6 +45,7 @@ export interface FinalProbabilityResult {
   data_limited: boolean
   disclaimer: string | null
   mode: string
+  similar_students?: SimilarStudents | null
 }
 
 export interface SchoolResult {

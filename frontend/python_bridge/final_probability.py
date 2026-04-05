@@ -11,6 +11,7 @@ _project_root = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '
 sys.path.insert(0, os.path.normpath(_project_root))
 
 from core.calibrate import final_probability, ADMITTED_PROFILES  # noqa: E402
+from core.recommend import find_similar  # noqa: E402
 
 
 def main() -> None:
@@ -50,6 +51,22 @@ def main() -> None:
     if result is None:
         print(json.dumps({'error': 'no_data'}))
         return
+
+    # Similar students: accepted-only, fixed ±5 window, no auto-widening
+    df, _ = find_similar(
+        grade, program, school=school,
+        tolerance=5.0, min_results=10, max_tolerance=5.0,
+    )
+    accepted = df[df['decision'] == 'ACCEPTED']
+    if len(accepted) >= 1:
+        result['similar_students'] = {
+            'count':     int(len(accepted)),
+            'avg_grade': round(float(accepted['core_avg'].mean()), 1),
+            'min_grade': round(float(accepted['core_avg'].min()), 1),
+            'max_grade': round(float(accepted['core_avg'].max()), 1),
+        }
+    else:
+        result['similar_students'] = None
 
     print(json.dumps(result))
 

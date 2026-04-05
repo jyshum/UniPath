@@ -1,12 +1,13 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import { FinalProbabilityResult, SupplementalType } from '@/lib/types'
+import { FinalProbabilityResult, SimilarStudents, SupplementalType } from '@/lib/types'
 import { getPersonalityLine, PROGRAM_LABELS, SUPPLEMENTAL_LABEL } from '@/lib/constants'
 
 interface Props {
   school:             string
   program:            string
+  grade:              number
   result:             FinalProbabilityResult
   supplementalTypes:  SupplementalType[]
   onAnotherSchool:    () => void
@@ -39,6 +40,7 @@ function useCountUp(target: number, duration = 800) {
 export default function ResultView({
   school,
   program,
+  grade,
   result,
   supplementalTypes,
   onAnotherSchool,
@@ -149,6 +151,48 @@ export default function ResultView({
           </div>
         </details>
       </div>
+
+      {/* ── Similar students panel ── */}
+      {result.similar_students !== undefined && result.similar_students !== null && (() => {
+        const s: SimilarStudents = result.similar_students
+        return (
+          <div className="w-full mt-4 animate-fade-up delay-500">
+            <div className="px-5 py-4 rounded-xl border border-white/8 bg-[#141414]">
+              <p className="text-xs text-[#f5f5f0]/35 uppercase tracking-widest mb-2">
+                Similar Students
+              </p>
+              {s.count >= 3 ? (
+                <p className="text-sm text-[#f5f5f0]/70 leading-relaxed">
+                  <span className="text-[#f5f5f0] font-medium">
+                    {s.count} students admitted to {school} {PROGRAM_LABELS[program] ?? program}
+                  </span>{' '}
+                  reported grades between {s.min_grade}% and {s.max_grade}%, with an average of{' '}
+                  {s.avg_grade}%.
+                </p>
+              ) : (
+                <p className="text-sm text-[#f5f5f0]/55 leading-relaxed">
+                  A small number of admitted students reported similar grades for this program.
+                  Data is limited — treat this as anecdotal.
+                </p>
+              )}
+            </div>
+          </div>
+        )
+      })()}
+
+      {result.similar_students === null && (
+        <div className="w-full mt-4 animate-fade-up delay-500">
+          <div className="px-5 py-4 rounded-xl border border-white/8 bg-[#141414]">
+            <p className="text-xs text-[#f5f5f0]/35 uppercase tracking-widest mb-2">
+              Similar Students
+            </p>
+            <p className="text-sm text-[#f5f5f0]/45 leading-relaxed">
+              No admitted students in our dataset reported grades in this range for this program.
+              This doesn&apos;t indicate rejection likelihood — our dataset is limited.
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* ── Action buttons ── */}
       <div className="w-full mt-8 flex gap-3 animate-fade-up delay-500">

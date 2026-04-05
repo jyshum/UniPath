@@ -228,6 +228,7 @@ export default function Page() {
         <ResultView
           school={submittedForm.school}
           program={submittedForm.program}
+          grade={parseFloat(submittedForm.grade)}
           result={result}
           supplementalTypes={submittedForm.supplementalTypes as SupplementalType[]}
           onAnotherSchool={handleAnotherSchool}
