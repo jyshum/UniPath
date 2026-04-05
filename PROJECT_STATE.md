@@ -1,13 +1,12 @@
 # UniPath AI — Project State
-Last updated: March 2026
+Last updated: April 5, 2026
 
 ---
 
 ## What It Is
 University outcomes tool for Canadian high school students.
-Students input grades + program + target schools and see how similar
-students actually performed — with a calibrated acceptance likelihood
-percentage anchored to published university acceptance rates.
+Students input grades + program + target school and see a calibrated
+acceptance likelihood percentage anchored to published university acceptance rates.
 
 Core differentiator: real student submission data, not synthetic or
 generic LLM advice.
@@ -15,66 +14,99 @@ generic LLM advice.
 ---
 
 ## Current Status
-- Stage 1 (ETL pipeline): COMPLETE
-- Stage 2 (recommendation engine): COMPLETE
-- Reddit scraping agent: COMPLETE (414 rows, re-run after tag_program fix)
-- Program category fix (tag_program): COMPLETE
-- Calibration layer (calibrate.py + ec_scorer.py): COMPLETE
-- app.py wired to final_probability(): NOT STARTED
-- Next.js frontend: PLANNED, not started
+
+| Component | Status |
+|---|---|
+| ETL pipeline (Google Sheets → DB) | COMPLETE |
+| Reddit scraping agent | COMPLETE — 415 rows |
+| Database (814 rows total) | COMPLETE |
+| Probability calibration (calibrate.py) | COMPLETE — 30 passing tests |
+| EC/supplemental scoring (ec_scorer.py) | COMPLETE |
+| Next.js frontend (form + result UI) | COMPLETE |
+| API route (/api/final-probability) | COMPLETE |
+| Python bridge (frontend → calibrate.py) | COMPLETE |
+| recommend.py wired to frontend | NOT DONE — DB lookup results not surfaced in UI |
+
+**Key gap:** The 814 DB rows are not contributing to the frontend result.
+The frontend currently shows probability % only (from calibrate.py + hardcoded stats).
+The DB data should power the social proof strip: "N similar students found — X accepted, Y rejected."
+This requires wiring recommend.py into the API route and result view.
 
 ---
 
 ## Architecture
 
 ### Data Flow
+
 ```
 Google Sheets (live) → fetch_sheets.py → data/processed/
 data/processed/ → normalize.py → data/cleaned/bc_cleaned.csv
 data/cleaned/ → extract_fields.py → data/cleaned/bc_extracted.csv
 data/cleaned/ → load_to_db.py → database/unipath.db
+
 Reddit JSON API → reddit_agent.py → database/unipath.db (direct)
-database/unipath.db → recommend.py → recommendation output
-calibrate.py + ec_scorer.py → final_probability() → display_percent
+
+database/unipath.db → core/calibrate.py (Gate 4 sanity check only)
+database/unipath.db → core/recommend.py → similar student breakdown  ← NOT YET IN FRONTEND
+
+core/calibrate.py (published stats + Ollama) → final_probability()
+final_probability() → frontend/python_bridge/ → /api/final-probability → page.tsx
 ```
 
 ### Key Files
-- `main.py` — runs full pipeline end to end (fetch → normalize → extract → load)
-- `pipeline/fetch_sheets.py` — pulls BC 2026 and BC 2025 sheets via public CSV URLs
-- `pipeline/normalize.py` — grade parsing, school normalization, decision normalization
-- `pipeline/extract_fields.py` — NLP keyword tagging for EC, circumstances, program
-- `pipeline/load_to_db.py` — loads cleaned CSV to SQLite, idempotent per source
-- `pipeline/reddit_agent.py` — standalone agent, run separately from main.py
-- `database/models.py` — SQLAlchemy ORM schema
-- `recommend.py` — lookup_school() and discover_schools() with auto-tolerance widening
-- `calibrate.py` — calibrated_probability() and final_probability(); all probability math
-- `ec_scorer.py` — score_profile() for EC and supplemental scoring via Ollama
-- `tools/research_profiles.py` — standalone draft tool for ADMITTED_PROFILES research
-- `app.py` — Streamlit prototype (not yet wired to final_probability)
-- `tests/test_calibration.py` — 30 pytest tests for calibration layer (all passing)
+
+| File | Purpose | Status |
+|---|---|---|
+| `main.py` | Orchestrates full ETL pipeline | COMPLETE |
+| `pipeline/fetch_sheets.py` | Pulls BC 2026 + BC 2025 from Google Sheets | COMPLETE |
+| `pipeline/normalize.py` | Grade parsing, school/decision normalization | COMPLETE |
+| `pipeline/extract_fields.py` | NLP tagging for EC, circumstances, program | COMPLETE |
+| `pipeline/load_to_db.py` | Loads cleaned CSV to SQLite, idempotent | COMPLETE |
+| `pipeline/reddit_agent.py` | Standalone Reddit scraper (run separately) | COMPLETE |
+| `database/models.py` | SQLAlchemy ORM schema | COMPLETE |
+| `core/recommend.py` | find_similar(), lookup_school(), discover_schools() | COMPLETE but NOT WIRED TO FRONTEND |
+| `core/calibrate.py` | calibrated_probability() and final_probability() | COMPLETE |
+| `core/ec_scorer.py` | score_profile() via Ollama llama3.2 | COMPLETE |
+| `frontend/app/page.tsx` | Main form + result UI | COMPLETE |
+| `frontend/app/api/final-probability/route.ts` | POST endpoint → python bridge | COMPLETE |
+| `frontend/lib/pythonBridge.ts` | Spawns Python subprocess | COMPLETE |
+| `frontend/python_bridge/final_probability.py` | Bridge: JSON stdin → calibrate → JSON stdout | COMPLETE |
+| `frontend/components/` | SchoolProgramSelector, GradeInput, SupplementalCards, ResultView, LoadingScreen, SummaryBar | COMPLETE |
+| `frontend/lib/constants.ts` | SCHOOLS, PROGRAMS_BY_SCHOOL, ADMITTED_PROFILE_KEYS | COMPLETE |
+| `tools/research_profiles.py` | Manual draft tool for new ADMITTED_PROFILES entries | COMPLETE |
+| `tests/test_calibration.py` | 30 pytest tests for calibrate.py + ec_scorer.py | COMPLETE, all passing |
 
 ### Database
-- Path: database/unipath.db
-- Table: students
+
+- Path: `database/unipath.db`
+- Table: `students`
 - Sources: BC (181 rows), BC_2025 (218 rows), REDDIT_SCRAPED (415 rows)
 - Total: 814 rows
-
-### Key Constants
-- DEFAULT_TOLERANCE = 2.0 (auto-widens to max 10.0)
-- MIN_RESULTS = 10 (threshold for tolerance widening)
-- REDDIT sources: r/OntarioGrade12s, r/BCGrade12s
-- Program categories: ENGINEERING, SCIENCE, BUSINESS, ARTS,
-  COMPUTER_SCIENCE, HEALTH, LAW, EDUCATION, OTHER
+- REDDIT_SCRAPED rows are preserved across pipeline re-runs (BC/BC_2025 are cleared and reloaded)
 
 ---
 
-## Calibration Layer — Architecture
+## How Probability Is Calculated
 
 ### The Formula
 ```
 base_probability × EC_multiplier × supp_multiplier_1 × supp_multiplier_2 …
     = raw → clamped 3%–92% → display_percent
 ```
+
+### What the DB contributes vs. what is hardcoded
+
+The probability calculation is anchored to **published university statistics**, not derived
+from the DB rows. This was an intentional decision after the Bayesian approach failed due
+to selection bias (Reddit over-represents accepted students — 10+ combos had inverted
+distributions where avg_rejected ≥ avg_accepted).
+
+| Data Source | Role |
+|---|---|
+| `BASE_RATES` (hardcoded in core/calibrate.py) | Published acceptance rates for 18 combos |
+| `ADMITTED_PROFILES` (hardcoded in core/calibrate.py) | Published admitted grade stats (mean, std) for 13 combos |
+| `database/unipath.db` | Gate 4 sanity check only (detects inverted distributions → falls back to Mode B) |
+| `database/unipath.db` via core/recommend.py | Should power social proof strip — NOT YET WIRED |
 
 ### Two Base Probability Modes
 
@@ -99,76 +131,122 @@ probability = clamp(raw, 0.03, 0.92)
 3. verified flag → sets confidence
 4. Inverted DB check (avg_accepted ≤ avg_rejected) → Mode B fallback
 
-### EC Multiplier (ec_scorer.py — Mode 1)
-- Applies when EC_CONSIDERED[school]=True AND ec_text provided
-- Ollama scores: leadership, commitment, impact, relevance (0–10 each)
-- Multiplier range: 0.80–1.375
-- If school not in EC_CONSIDERED, defaults to True
-
-### Supplemental Multipliers (multi-select, independent)
-Each type in supplemental_types gets its own multiplier:
+### Supplemental Multipliers
 
 | Type | Logic |
 |---|---|
 | none | 1.0 always |
-| essay / aif | not completed → fixed penalty (0.92/0.90); completed+text → Ollama Mode 3 (0.80–1.15); completed no text → 1.0 |
-| interview | 0.85 always (fixed — cannot score performance) |
-| activity_list | text provided → Ollama Mode 1 (0.80–1.375); else 1.0 |
+| essay | not completed → 0.92; completed + text → Ollama Mode 3 (1.00–2.00); completed no text → 1.0 |
+| aif | not completed → 0.95; completed + text → Ollama Mode 3; completed no text → 1.0 |
+| interview | 0.85 always |
+| activity_list | text → Ollama Mode 1 (0.80–1.375); else 1.0 |
 
-Fixed penalties in SUPPLEMENTAL_PENALTIES: essay=0.92, aif=0.90, interview=0.85
+### EC Multiplier (ec_scorer.py — Mode 1)
+- Applies when EC_CONSIDERED[school]=True AND ec_text provided
+- Ollama scores: leadership, commitment, impact, relevance (0–10 each)
+- Multiplier range: 0.80–1.375
+- EC_CONSIDERED=False: McMaster University, Simon Fraser University
 
-### Covered Combos (ADMITTED_PROFILES — 13 entries, all verified=True)
-| School | Programs |
-|---|---|
-| UBC Vancouver | ENGINEERING, SCIENCE, BUSINESS |
-| University of Waterloo | COMPUTER_SCIENCE, ENGINEERING |
-| University of Toronto | ENGINEERING, COMPUTER_SCIENCE, BUSINESS |
-| Western University | BUSINESS |
-| Queen's University | BUSINESS |
-| McMaster University | HEALTH |
-| Simon Fraser University | ENGINEERING, SCIENCE |
+### Covered Combos
 
-BASE_RATES covers 18 combos total (5 additional as Mode B: UBC COMPUTER_SCIENCE,
-UBC HEALTH, UBC ARTS, Waterloo (no extras), UofT SCIENCE, SFU BUSINESS).
+| School | ADMITTED_PROFILES (Mode A) | BASE_RATES only (Mode B) |
+|---|---|---|
+| UBC Vancouver | ENGINEERING, SCIENCE, BUSINESS | COMPUTER_SCIENCE, HEALTH, ARTS |
+| University of Waterloo | COMPUTER_SCIENCE, ENGINEERING | — |
+| University of Toronto | ENGINEERING, COMPUTER_SCIENCE, BUSINESS | SCIENCE |
+| Western University | BUSINESS | — |
+| Queen's University | BUSINESS | — |
+| McMaster University | HEALTH | — |
+| Simon Fraser University | ENGINEERING, SCIENCE | BUSINESS |
 
-EC_CONSIDERED=False: McMaster University, Simon Fraser University
+---
+
+## Frontend State
+
+The Next.js frontend is built and wired end-to-end for probability display.
+
+### What works
+- Form: school + program selector (validates against ADMITTED_PROFILE_KEYS)
+- Grade input (50–100)
+- Supplemental cards (multi-select, per-type conditional inputs)
+- Loading animation (2.5s)
+- Result view: probability %, confidence badge, decision breakdown, Ollama reasoning
+- Summary bar: session history for multi-school comparison
+- API route → python bridge → calibrate.final_probability() → JSON response
+
+### What's missing
+- **Social proof / similar student strip**: "N students found — X accepted, Y rejected"
+  This requires adding a recommend.py call to the API route and extending the result view.
+- Mobile optimization
+- Deployment (Vercel)
+- ADMITTED_PROFILE_KEYS gate currently restricts frontend to 13 combos only
+
+### Frontend → Python bridge call chain
+```
+page.tsx → POST /api/final-probability
+  → pythonBridge.ts (spawns subprocess)
+  → frontend/python_bridge/final_probability.py
+  → calibrate.final_probability(school, program, grade, supplemental_types, ...)
+  → JSON response → ResultView
+```
+
+---
+
+## Immediate Next Steps
+
+### 1. Wire recommend.py into the result (HIGH VALUE — makes pipeline data matter)
+Add a second call in `frontend/python_bridge/final_probability.py` to `recommend.lookup_school()`.
+Include in JSON response: `{total_similar, accepted_count, rejected_count, avg_grade_accepted}`.
+Extend `ResultView.tsx` to show: "Based on N similar students: X accepted (Y%), Z rejected."
+This is the single change that makes the 814 DB rows contribute to the product.
+
+### 2. Expand ADMITTED_PROFILES coverage
+Current: 13 combos. Missing high-traffic combos:
+- UBC COMPUTER_SCIENCE
+- UBC HEALTH
+- UofT SCIENCE
+- SFU BUSINESS
+Use `tools/research_profiles.py` as a starting draft, then verify manually.
+
+### 3. Expand BASE_RATES + ADMITTED_PROFILES to new schools
+Candidates with 5+ rows but no BASE_RATES entry:
+Western ENGINEERING, Queen's ENGINEERING, McMaster SCIENCE, McGill ENGINEERING, York BUSINESS.
+
+### 4. Deployment
+- Vercel for Next.js frontend
+- Python bridge requires a sidecar (FastAPI or similar) — subprocess spawn won't work in Vercel serverless
+- Alternative: deploy Python layer on Railway/Render, call via HTTP from Next.js API routes
 
 ---
 
 ## Key Architectural Decisions
 
-### Why published-stats grade distribution instead of Bayesian DB approach
-The original Bayesian formula (accepted vs rejected DB rows) was abandoned after
-validation confirmed only 4 of 18 combos could produce output. Root cause: Reddit
-data structurally over-represents accepted students (self-selection bias), causing
-10+ combos to have inverted distributions (avg rejected ≥ avg accepted). The
-grade-distribution approach uses published admitted grade statistics (ADMITTED_PROFILES)
-anchored to published acceptance rates — produces output for all 13 ADMITTED_PROFILES
-combos regardless of DB rejection data quality.
+### Why published-stats calibration instead of Bayesian DB approach
+The Bayesian formula (accepted vs rejected DB rows) was abandoned after validation
+confirmed only 4 of 18 combos could produce output. Root cause: Reddit data
+structurally over-represents accepted students (selection bias), causing 10+ combos
+to have inverted distributions (avg_rejected ≥ avg_accepted). The current approach
+uses published admitted grade statistics anchored to published acceptance rates —
+produces output for all 13 ADMITTED_PROFILES combos regardless of DB quality.
 
-### Why supplemental_flags.py was eliminated
-Originally planned as a per-school lookup for supplemental types and EC flags.
-Removed because it required maintaining a school-keyed config that duplicated
-information students already know about their own application. Final architecture:
-student tells the system what supplementals they have — no per-school lookup needed.
-
-### Why clear-and-reload instead of upsert
-No natural unique key per student row. Students don't submit identifying information.
-Clear-and-reload is idempotent and safe. Only applies to BC and BC_2025 sources —
-REDDIT_SCRAPED rows are preserved across pipeline runs.
+### Why the DB still matters despite not driving calibration
+1. Gate 4 sanity check — detects and neutralizes inverted distributions
+2. recommend.py lookup — actual students with similar grades/programs → social proof
+3. Future expansion — as DB grows, may eventually support Bayesian estimates for
+   combos with enough clean data
 
 ### Why reddit_agent.py is separate from main.py
-The agent is slow (30-40 min), makes live HTTP requests, and should only run
-occasionally — not on every data refresh. main.py runs in under 10 seconds
-for daily sheet refresh.
+The agent is slow (30–40 min), makes live HTTP requests, and should only run
+occasionally. main.py runs in under 10 seconds for daily sheet refresh.
+
+### Why Python bridge instead of rewriting calibrate.py in TypeScript
+High risk, low benefit. The calibration math and Ollama integration are stable
+and tested. The bridge (stdin/stdout JSON) is the lowest-friction path to v1.
+Production path: wrap in FastAPI, call via HTTP.
 
 ### Why SQLite over PostgreSQL
 Dataset is <10,000 rows. Zero setup, single file, sufficient for v1. Migration
 path: change connection string in get_engine().
-
-### Why JSON arrays for ec_tags and circumstance_tags
-SQLite json_each() enables clean tag queries. Pipe-separated strings would
-require fragile LIKE queries.
 
 ---
 
@@ -180,7 +258,7 @@ require fragile LIKE queries.
   - Gate 4 in calibrated_probability detects and neutralizes inverted combos
 
 - Ontario data still pending Reddit DM permission
-  - Would add ~3000 rows, single largest data lever
+  - Would add ~3,000 rows — single largest data lever
 
 ### School Normalization
 - SCHOOL_LOOKUP covers 60+ name variants
@@ -196,101 +274,10 @@ require fragile LIKE queries.
 
 ---
 
-## Recommendation Engine State
-
-### recommend.py functions
-- lookup_school(school, grade, program, tolerance) → dict
-- discover_schools(grade, program, tolerance, min_results) → list[dict]
-- find_similar() — core query with auto-tolerance widening
-- print_summary() — pretty print for terminal testing
-
-Note: recommend.py currently calls calibrated_probability() directly (old path).
-It should eventually call final_probability() so EC/supplemental multipliers
-are applied. This update happens when the frontend is wired up.
-
-### School+Program combinations with 5+ rows
-UBC Vancouver: SCIENCE(73), ENGINEERING(60), BUSINESS(37),
-               COMPUTER_SCIENCE(9), HEALTH(12), ARTS(21)
-Western: BUSINESS(38), HEALTH(22), ENGINEERING(20), CS(6)
-UofT: ENGINEERING(24), SCIENCE(23), BUSINESS(16), CS(16)
-Waterloo: COMPUTER_SCIENCE(25), ENGINEERING(16)
-Queen's: BUSINESS(12), ENGINEERING(12), HEALTH(5)
-York: BUSINESS(11), ENGINEERING(6)
-McMaster: SCIENCE(11), ENGINEERING(6)
-McGill: ENGINEERING(10)
-SFU: SCIENCE(15), ENGINEERING(10), BUSINESS(8), HEALTH(8)
-Laurier: BUSINESS(11)
-TMU: ENGINEERING(6)
-
----
-
-## Immediate Next Steps
-
-### 1. Wire final_probability() into app.py (unblock student-facing display)
-The current app.py calls the old calibrated_probability() path and shows
-a basic st.metric block. Needs to be replaced with a full input form:
-- Grade input (number)
-- Program category (select)
-- Target school (select)
-- EC text area (shown only when EC_CONSIDERED[school]=True)
-- Supplemental multi-select (none / essay / aif / interview / activity_list)
-- Per-supplemental: completed toggle + optional text paste
-Output: display_percent with confidence, disclaimer if data_limited,
-reasoning from Ollama if EC/supplemental was scored.
-
-### 2. Frontend planning — Next.js
-See Frontend Plan section below.
-
-### 3. Expand ADMITTED_PROFILES coverage
-Current: 13 combos. Missing high-traffic combos:
-- UBC COMPUTER_SCIENCE (in BASE_RATES, no profile yet)
-- UBC HEALTH (in BASE_RATES, no profile yet)
-- UofT SCIENCE (in BASE_RATES, no profile yet)
-- SFU BUSINESS (in BASE_RATES, no profile yet)
-Use tools/research_profiles.py as a starting draft, then verify manually.
-
-### 4. Expand BASE_RATES + ADMITTED_PROFILES to new schools
-Candidates with 5+ rows but no BASE_RATES entry: Western ENGINEERING,
-Queen's ENGINEERING, McMaster SCIENCE, McGill ENGINEERING, York BUSINESS.
-Requires researching published acceptance rates first.
-
----
-
-## Frontend Plan (Next.js)
-
-### Stack
-Next.js + TypeScript + Tailwind CSS, deployed on Vercel.
-Backend: Next.js API routes calling Python logic via subprocess or FastAPI sidecar.
-(recommend.py and calibrate.py stay in Python — rewriting as TypeScript is
-high risk with low benefit at this stage.)
-
-### Core User Flow
-1. Student inputs: grade (number), program category (select), target school (select)
-2. EC text area appears if school considers ECs
-3. Supplemental multi-select: pick all types that apply
-4. Per-type conditional inputs: completed toggle, optional paste area
-5. Results: large display_percent, confidence badge, outcome distribution strip
-6. Honest framing throughout: "X% of similar students were accepted" not
-   "your chance is X%"
-
-### Pages
-- `/` — value prop + input form (single-page app feel)
-- `/results` — school cards with display_percent, confidence, data caveats
-- `/school/[slug]` — detailed view: full grade distribution, sample size,
-  EC/supplemental breakdown, Mode A/B indicator
-
-### Key UI Decisions to Make
-- How to surface data_limited warning without alarming users
-- Whether to show the full multiplier chain (base × EC × supp) or just display_percent
-- Mobile-first or desktop-first (likely mobile given student demographic)
-- Whether to support multi-school comparison in v1 (discover_schools path)
-
----
-
 ## Tech Stack Summary
 - Python 3.13, pandas, spaCy, SQLAlchemy, SQLite, scipy
 - Ollama (llama3.2) for Reddit extraction and EC/supplemental scoring
 - Reddit JSON API (no auth) for scraping
-- Next.js + TypeScript + Tailwind (planned frontend)
-- Vercel (planned deployment)
+- Next.js + TypeScript + Tailwind CSS (frontend — built)
 - GitHub: https://github.com/jyshum/UniPath (private)
+- Deployment: NOT YET (Vercel for frontend; Python layer needs sidecar)

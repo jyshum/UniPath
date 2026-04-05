@@ -6,14 +6,14 @@
 import pytest
 from unittest.mock import MagicMock, patch
 
-from calibrate import (
+from core.calibrate import (
     calibrated_probability,
     final_probability,
     BASE_RATES,
     ADMITTED_PROFILES,
     SUPPLEMENTAL_PENALTIES,
 )
-from ec_scorer import score_profile
+from core.ec_scorer import score_profile
 
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
@@ -140,7 +140,7 @@ def test_9_higher_sensitivity_increases_probability_spread():
 
 def test_10_mode_0_no_text_returns_multiplier_1_no_ollama_call():
     """Mode 0: no text → multiplier=1.0, mode=0, no Ollama call."""
-    with patch("ec_scorer.ollama.chat") as mock_chat:
+    with patch("core.ec_scorer.ollama.chat") as mock_chat:
         result = score_profile()
     assert result["multiplier"] == 1.0
     assert result["mode"] == 0
@@ -150,7 +150,7 @@ def test_10_mode_0_no_text_returns_multiplier_1_no_ollama_call():
 
 def test_11_ollama_unreachable_returns_multiplier_1_no_crash():
     """Ollama failure (exception) → multiplier=1.0, never raises."""
-    with patch("ec_scorer.ollama.chat", side_effect=Exception("connection refused")):
+    with patch("core.ec_scorer.ollama.chat", side_effect=Exception("connection refused")):
         result = score_profile(ec_text="Led robotics club for three years")
     assert result["multiplier"] == 1.0
 
@@ -158,7 +158,7 @@ def test_11_ollama_unreachable_returns_multiplier_1_no_crash():
 def test_12_ec_text_only_selects_mode_1():
     """ec_text provided, supplemental_text empty → Mode 1, EC dimensions scored."""
     payload = '{"leadership": 7, "commitment": 8, "impact": 6, "relevance": 8, "reasoning": "Solid."}'
-    with patch("ec_scorer.ollama.chat", return_value={"message": {"content": payload}}):
+    with patch("core.ec_scorer.ollama.chat", return_value={"message": {"content": payload}}):
         result = score_profile(ec_text="Robotics club president for three years")
     assert result["mode"] == 1
     assert set(result["scores"].keys()) == {"leadership", "commitment", "impact", "relevance"}
@@ -167,7 +167,7 @@ def test_12_ec_text_only_selects_mode_1():
 def test_13_supplemental_text_only_selects_mode_3():
     """supplemental_text provided, ec_text empty → Mode 3, essay dimensions scored."""
     payload = '{"clarity": 8, "self_awareness": 7, "curiosity": 7, "fit": 8, "reasoning": "Clear."}'
-    with patch("ec_scorer.ollama.chat", return_value={"message": {"content": payload}}):
+    with patch("core.ec_scorer.ollama.chat", return_value={"message": {"content": payload}}):
         result = score_profile(supplemental_text="Q: Why engineering?\nA: I love building things.")
     assert result["mode"] == 3
     assert set(result["scores"].keys()) == {"clarity", "self_awareness", "curiosity", "fit"}
@@ -176,7 +176,7 @@ def test_13_supplemental_text_only_selects_mode_3():
 def test_14_both_texts_provided_mode_1_takes_priority_no_crash():
     """Both ec_text and supplemental_text → Mode 1 fires (ec_text priority), no crash."""
     payload = '{"leadership": 7, "commitment": 8, "impact": 6, "relevance": 8, "reasoning": "Good."}'
-    with patch("ec_scorer.ollama.chat", return_value={"message": {"content": payload}}):
+    with patch("core.ec_scorer.ollama.chat", return_value={"message": {"content": payload}}):
         result = score_profile(
             ec_text="Robotics president",
             supplemental_text="Q: Why this program?\nA: I love it.",
@@ -188,7 +188,7 @@ def test_14_both_texts_provided_mode_1_takes_priority_no_crash():
 def test_15_markdown_fenced_json_parsed_without_crash():
     """Ollama response wrapped in ```json ... ``` fences → parsed correctly, no crash."""
     raw = "```json\n{\"leadership\": 9, \"commitment\": 9, \"impact\": 8, \"relevance\": 9, \"reasoning\": \"Excellent.\"}\n```"
-    with patch("ec_scorer.ollama.chat", return_value={"message": {"content": raw}}):
+    with patch("core.ec_scorer.ollama.chat", return_value={"message": {"content": raw}}):
         result = score_profile(ec_text="Award-winning researcher and team lead")
     # avg = (9+9+8+9)/4 = 8.75 → multiplier = 1.375
     assert result["multiplier"] == 1.375
@@ -206,13 +206,14 @@ def test_16_returns_none_for_unknown_combo():
 def test_17_output_clamped_at_0_92_maximum():
     """Raw probability above 0.92 is clamped to 0.92."""
     # UBC Science: base_rate=0.52, mean=88, std=3.
-    # grade=98 → z=3.33, percentile≈0.9996, deviation≈0.5, raw=0.52*1.75=0.91 (near cap at base).
-    # Then EC multiplier 1.375 pushes it well above 0.92.
+    # grade=98 → z=3.33, percentile≈0.9996, raw≈0.52*1.75=0.91.
+    # activity_list multiplier 1.375 pushes it above 0.92 → clamped.
     conn = make_conn(avg_accepted=95.0, avg_rejected=88.0)
-    with patch("calibrate.score_profile", return_value=mode1_result(multiplier=1.375)):
+    with patch("core.calibrate.score_profile", return_value=mode1_result(multiplier=1.375)):
         result = final_probability(
             "UBC Vancouver", "SCIENCE", grade=98.0,
-            ec_text="Extensive activities",
+            supplemental_types=["activity_list"],
+            supplemental_texts={"activity_list": "Robotics, volleyball, coding club."},
             conn=conn,
         )
     assert result is not None
@@ -251,19 +252,15 @@ def test_20_disclaimer_not_none_when_data_limited():
     assert len(result["disclaimer"]) > 0
 
 
-def test_21_empty_supplemental_types_profile_multiplier_equals_ec_multiplier():
-    """supplemental_types=[] → profile_multiplier is exactly the ec_multiplier."""
+def test_21_empty_supplemental_types_profile_multiplier_is_1():
+    """supplemental_types=[] → profile_multiplier is exactly 1.0."""
     conn = make_conn(avg_accepted=95.0, avg_rejected=88.0)
-    ec_mult = 1.20
-    with patch("calibrate.score_profile", return_value=mode1_result(multiplier=ec_mult)):
-        result = final_probability(
-            "UBC Vancouver", "ENGINEERING", grade=90.0,
-            ec_text="Active in many activities",
-            supplemental_types=[],
-            conn=conn,
-        )
-    assert result["ec_multiplier"] == ec_mult
-    assert result["profile_multiplier"] == pytest.approx(ec_mult, rel=1e-5)
+    result = final_probability(
+        "UBC Vancouver", "ENGINEERING", grade=90.0,
+        supplemental_types=[],
+        conn=conn,
+    )
+    assert result["profile_multiplier"] == pytest.approx(1.0, rel=1e-5)
 
 
 def test_22_interview_applies_0_85_penalty_regardless_of_other_inputs():
@@ -297,7 +294,7 @@ def test_24_essay_completed_with_text_applies_mode_3_score_not_fixed_penalty():
     """essay completed with text → Mode 3 Ollama score applied, fixed penalty NOT used."""
     conn = make_conn(avg_accepted=95.0, avg_rejected=88.0)
     scored_mult = 1.08
-    with patch("calibrate.score_profile", return_value=mode3_result(multiplier=scored_mult)):
+    with patch("core.calibrate.score_profile", return_value=mode3_result(multiplier=scored_mult)):
         result = final_probability(
             "UBC Vancouver", "ENGINEERING", grade=90.0,
             supplemental_types=["essay"],
@@ -328,7 +325,7 @@ def test_26_activity_list_with_text_applies_mode_1_score():
     """activity_list with text → Mode 1 Ollama score applied."""
     conn = make_conn(avg_accepted=95.0, avg_rejected=88.0)
     scored_mult = 1.20
-    with patch("calibrate.score_profile", return_value=mode1_result(multiplier=scored_mult)):
+    with patch("core.calibrate.score_profile", return_value=mode1_result(multiplier=scored_mult)):
         result = final_probability(
             "UBC Vancouver", "ENGINEERING", grade=90.0,
             supplemental_types=["activity_list"],
@@ -352,46 +349,40 @@ def test_27_multiple_supplemental_types_composed_independently():
     assert result is not None
     assert len(result["supp_multipliers"]) == 2
     assert 0.92 in result["supp_multipliers"]
-    assert 0.85 in result["supp_multipliers"]
-    expected_profile_mult = 1.0 * 0.92 * 0.85  # ec=1.0 (no ec_text) × two supp multipliers
+    assert 0.90 in result["supp_multipliers"]
+    expected_profile_mult = 0.92 * 0.90  # essay penalty × interview penalty
     assert result["profile_multiplier"] == pytest.approx(expected_profile_mult, rel=1e-5)
 
 
-def test_28_ec_considered_false_ignores_ec_text():
-    """EC_CONSIDERED=False for school → ec_text ignored, ec_multiplier=1.0, score_profile not called for EC."""
+def test_28_activity_list_without_text_applies_no_multiplier():
+    """activity_list selected but no text provided → supp multiplier = 1.0."""
     conn = make_conn(avg_accepted=95.0, avg_rejected=88.0)
-    with patch("calibrate.score_profile") as mock_sp:
-        result = final_probability(
-            "Simon Fraser University", "ENGINEERING", grade=85.0,
-            ec_text="Award-winning researcher and team lead",
-            conn=conn,
-        )
-    assert result["ec_multiplier"] == 1.0
-    assert result["ec_considered"] is False
-    mock_sp.assert_not_called()
+    result = final_probability(
+        "UBC Vancouver", "ENGINEERING", grade=90.0,
+        supplemental_types=["activity_list"],
+        supplemental_texts={},
+        conn=conn,
+    )
+    assert result is not None
+    assert result["supp_multipliers"] == [1.0]
 
 
-def test_29_school_not_in_ec_considered_defaults_to_true_and_respects_ec_text():
-    """school absent from EC_CONSIDERED dict → default True → ec_text IS scored."""
+def test_29_none_supplemental_type_applies_no_multiplier():
+    """'none' supplemental type → supp multiplier = 1.0."""
     conn = make_conn(avg_accepted=95.0, avg_rejected=88.0)
-    ec_mult = 1.20
-    # Clear EC_CONSIDERED entirely so UBC Vancouver is no longer listed
-    with patch.dict("calibrate.EC_CONSIDERED", {}, clear=True):
-        with patch("calibrate.score_profile", return_value=mode1_result(multiplier=ec_mult)):
-            result = final_probability(
-                "UBC Vancouver", "ENGINEERING", grade=90.0,
-                ec_text="Many great extracurriculars",
-                conn=conn,
-            )
-    assert result["ec_multiplier"] == ec_mult
-    assert result["ec_considered"] is True
+    result = final_probability(
+        "UBC Vancouver", "ENGINEERING", grade=90.0,
+        supplemental_types=["none"],
+        conn=conn,
+    )
+    assert result is not None
+    assert result["supp_multipliers"] == [1.0]
 
 
 def test_30_arithmetic_composition_is_correct():
-    """base × ec × supp1 × supp2 = expected probability (verify exact arithmetic)."""
-    ec_mult    = 1.20
+    """base × supp1 × supp2 = expected probability (verify exact arithmetic)."""
     supp1_mult = 0.92   # essay not completed
-    supp2_mult = 0.85   # interview fixed
+    supp2_mult = 0.90   # interview fixed
 
     base = calibrated_probability(
         "UBC Vancouver", "ENGINEERING", grade=90.0,
@@ -400,16 +391,14 @@ def test_30_arithmetic_composition_is_correct():
     base_prob = base["probability"]
 
     conn = make_conn(avg_accepted=95.0, avg_rejected=88.0)
-    with patch("calibrate.score_profile", return_value=mode1_result(multiplier=ec_mult)):
-        result = final_probability(
-            "UBC Vancouver", "ENGINEERING", grade=90.0,
-            ec_text="Active in many activities",
-            supplemental_types=["essay", "interview"],
-            supplemental_completed={"essay": False},
-            conn=conn,
-        )
+    result = final_probability(
+        "UBC Vancouver", "ENGINEERING", grade=90.0,
+        supplemental_types=["essay", "interview"],
+        supplemental_completed={"essay": False},
+        conn=conn,
+    )
 
-    expected_profile_mult = ec_mult * supp1_mult * supp2_mult
+    expected_profile_mult = supp1_mult * supp2_mult
     expected_raw          = base_prob * expected_profile_mult
     expected_prob         = round(min(max(expected_raw, 0.03), 0.92), 4)
 

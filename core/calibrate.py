@@ -4,8 +4,8 @@
 
 import sqlite3
 from scipy.stats import norm
-import ec_scorer
-from ec_scorer import score_profile
+from core import ec_scorer
+from core.ec_scorer import score_profile
 
 DB_PATH = "database/unipath.db"
 
@@ -13,24 +13,23 @@ DB_PATH = "database/unipath.db"
 
 # Published acceptance rates. Every combo shown to the user must appear here.
 BASE_RATES: dict[tuple[str, str], float] = {
-    ("UBC Vancouver",           "ENGINEERING"):      0.32,
-    ("UBC Vancouver",           "SCIENCE"):          0.52,
-    ("UBC Vancouver",           "BUSINESS"):         0.30,
-    ("UBC Vancouver",           "COMPUTER_SCIENCE"): 0.25,
-    ("UBC Vancouver",           "HEALTH"):           0.20,
-    ("UBC Vancouver",           "ARTS"):             0.55,
-    ("University of Waterloo",  "COMPUTER_SCIENCE"): 0.12,
-    ("University of Waterloo",  "ENGINEERING"):      0.38,
-    ("University of Toronto",   "ENGINEERING"):      0.35,
-    ("University of Toronto",   "COMPUTER_SCIENCE"): 0.15,
-    ("University of Toronto",   "BUSINESS"):         0.20,
-    ("University of Toronto",   "SCIENCE"):          0.40,
-    ("Western University",      "BUSINESS"):         0.25,
-    ("Queen's University",      "BUSINESS"):         0.22,
-    ("McMaster University",     "HEALTH"):           0.05,
-    ("Simon Fraser University", "ENGINEERING"):      0.55,
-    ("Simon Fraser University", "SCIENCE"):          0.60,
-    ("Simon Fraser University", "BUSINESS"):         0.45,
+    ("UBC Vancouver",           "ENGINEERING"):      0.27,
+    ("UBC Vancouver",           "SCIENCE"):          0.25,
+    ("UBC Vancouver",           "BUSINESS"):         0.15,
+    ("UBC Vancouver",           "HEALTH"):           0.18,
+    ("UBC Vancouver",           "ARTS"):             0.45,
+    ("University of Waterloo",  "COMPUTER_SCIENCE"): 0.06,
+    ("University of Waterloo",  "ENGINEERING"):      0.15,
+    ("University of Toronto",   "ENGINEERING"):      0.30,
+    ("University of Toronto",   "COMPUTER_SCIENCE"): 0.08,
+    ("University of Toronto",   "BUSINESS"):         0.15,
+    ("University of Toronto",   "SCIENCE"):          0.45,
+    ("Western University",      "BUSINESS"):         0.09,
+    ("Queen's University",      "BUSINESS"):         0.07,
+    ("McMaster University",     "HEALTH"):           0.06,
+    ("Simon Fraser University", "ENGINEERING"):      0.58,
+    ("Simon Fraser University", "SCIENCE"):          0.65,
+    ("Simon Fraser University", "BUSINESS"):         0.55,
 }
 
 # Published admitted grade profiles. Subset of BASE_RATES.
@@ -38,82 +37,82 @@ BASE_RATES: dict[tuple[str, str], float] = {
 # Combo in BASE_RATES only  → Mode B (base rate only, data_limited=True).
 ADMITTED_PROFILES: dict[tuple[str, str], dict] = {
     ("UBC Vancouver", "ENGINEERING"): {
-        "mean_admitted": 90.0,
-        "std_admitted":  3.0,
+        "mean_admitted": 93.0,
+        "std_admitted":  2.0,
         "verified":      True,
-        "source":        "UBC Engineering FAQ — competitive range 88-92%",
+        "source":        "UBC Wiki 2024 + UBC Engineering entrance chart — admitted range 91-94%",
     },
     ("UBC Vancouver", "SCIENCE"): {
-        "mean_admitted": 88.0,
-        "std_admitted":  3.0,
-        "verified":      True,
-        "source":        "UBC 2024 data — range 86-90%",
-    },
-    ("UBC Vancouver", "BUSINESS"): {
-        "mean_admitted": 90.0,
+        "mean_admitted": 93.0,
         "std_admitted":  2.5,
         "verified":      True,
-        "source":        "Sauder official page — competitive avg 87-92%",
+        "source":        "UBC Wiki 2018 — domestic Science incoming avg 93.8%",
+    },
+    ("UBC Vancouver", "BUSINESS"): {
+        "mean_admitted": 93.0,
+        "std_admitted":  2.0,
+        "verified":      True,
+        "source":        "GrantMe + Youthfully Sauder guide — domestic incoming avg ~93%",
     },
     ("University of Waterloo", "COMPUTER_SCIENCE"): {
         "mean_admitted": 95.5,
         "std_admitted":  1.5,
         "verified":      True,
-        "source":        "Multiple sources — most admitted above 95%",
+        "source":        "Youthfully + LiwinCo — competitive threshold 95%+, most admits above 95%",
     },
     ("University of Waterloo", "ENGINEERING"): {
-        "mean_admitted": 94.0,
-        "std_admitted":  2.0,
+        "mean_admitted": 91.5,
+        "std_admitted":  3.0,
         "verified":      True,
-        "source":        "Multiple sources — mid-90s norm",
+        "source":        "Youthfully Waterloo Engineering guide — range 88-95% across disciplines; Software ~95+, Civil/Chem lower",
     },
     ("University of Toronto", "ENGINEERING"): {
         "mean_admitted": 95.4,
-        "std_admitted":  2.0,
+        "std_admitted":  1.5,
         "verified":      True,
-        "source":        "UofT Engineering By The Numbers 2024 — OFFICIAL",
+        "source":        "UofT Engineering By The Numbers 2024 — OFFICIAL; 2020 Ontario avg 94.5%, current est. 95.4%",
     },
     ("University of Toronto", "COMPUTER_SCIENCE"): {
         "mean_admitted": 96.0,
         "std_admitted":  1.5,
         "verified":      True,
-        "source":        "Multiple sources — mid to high 90s consensus",
+        "source":        "CollegeVine + Youthfully — mid to high 90s, competitive threshold 95%+",
     },
     ("University of Toronto", "BUSINESS"): {
-        "mean_admitted": 91.0,
-        "std_admitted":  2.5,
+        "mean_admitted": 92.5,
+        "std_admitted":  2.0,
         "verified":      True,
-        "source":        "grantme.ca — Rotman ~89-91%",
+        "source":        "Uniscope CUDO data — largest share admitted 90-94% (32.9%) and 95%+ (29.5%)",
     },
     ("Western University", "BUSINESS"): {
         "mean_admitted": 93.0,
         "std_admitted":  2.0,
         "verified":      True,
-        "source":        "youthfully.com Ivey guide — 90% minimum competitive",
+        "source":        "Youthfully Ivey AEO guide + GrantMe — 93%+ competitive benchmark for AEO designation",
     },
     ("Queen's University", "BUSINESS"): {
-        "mean_admitted": 90.0,
-        "std_admitted":  2.5,
-        "verified":      True,
-        "source":        "Smith Commerce FAQ — 87% minimum, competitive high 80s-90s",
-    },
-    ("McMaster University", "HEALTH"): {
-        "mean_admitted": 93.0,
+        "mean_admitted": 92.0,
         "std_admitted":  2.0,
         "verified":      True,
-        "source":        "McMaster BHSc FAQ — offers across low-to-high 90s",
+        "source":        "Youthfully + MasterStudent — historical avg 91.7% (2014) rising to 92.7% (2016), est. ~92% current",
+    },
+    ("McMaster University", "HEALTH"): {
+        "mean_admitted": 94.5,
+        "std_admitted":  1.5,
+        "verified":      True,
+        "source":        "Youthfully + GrantMe BHSc guide — ~88% of admitted students have 94%+",
     },
     ("Simon Fraser University", "ENGINEERING"): {
+        "mean_admitted": 86.0,
+        "std_admitted":  3.0,
+        "verified":      True,
+        "source":        "SFU official historical admission grade ranges — mid 80s for Engineering Science",
+    },
+    ("Simon Fraser University", "SCIENCE"): {
         "mean_admitted": 85.0,
         "std_admitted":  3.0,
         "verified":      True,
-        "source":        "SFU official historical grade ranges — mid 80s",
-    },
-    ("Simon Fraser University", "SCIENCE"): {
-        "mean_admitted": 82.0,
-        "std_admitted":  3.5,
-        "verified":      True,
-        "source":        "SFU grade-only admission, Science range estimated",
+        "source":        "SFU official historical admission grade ranges — mid 80s for Science programs",
     },
 }
 
@@ -134,8 +133,8 @@ EC_CONSIDERED: dict[str, bool] = {
 # cannot be scored (interview always fixed; essay/AIF when not yet completed).
 SUPPLEMENTAL_PENALTIES: dict[str, float] = {
     "essay":     0.92,
-    "aif":       0.90,
-    "interview": 0.85,
+    "aif":       0.95,
+    "interview": 1.00,
 }
 
 _MODE_B_DISCLAIMER = (
@@ -281,7 +280,6 @@ def final_probability(
     school: str,
     program_category: str,
     grade: float,
-    ec_text: str = "",
     supplemental_types: list[str] = [],
     supplemental_texts: dict[str, str] = {},
     supplemental_completed: dict[str, bool] = {},
@@ -289,12 +287,11 @@ def final_probability(
     conn=None,
 ) -> dict | None:
     """
-    Computes: base_probability × EC_multiplier × supp_multiplier(s) → clamped 3%–92%.
+    Computes: base_probability × supp_multiplier(s) → clamped 3%–92%.
 
     Step 1 — calibrated_probability() for base.
-    Step 2 — EC multiplier (Ollama Mode 1 if school considers ECs and ec_text provided).
-    Step 3 — One supplemental multiplier per type in supplemental_types.
-    Step 4 — Compose all multipliers, clamp, return.
+    Step 2 — One supplemental multiplier per type in supplemental_types.
+    Step 3 — Compose all multipliers, clamp, return.
 
     Returns None only when school+program not in BASE_RATES.
     """
@@ -303,15 +300,7 @@ def final_probability(
     if base is None:
         return None
 
-    # Step 2 — EC multiplier
-    ec_considered = EC_CONSIDERED.get(school, True)
-    if ec_considered and ec_text.strip():
-        ec_result = score_profile(ec_text=ec_text)
-        ec_multiplier = ec_result["multiplier"]
-    else:
-        ec_multiplier = 1.0
-
-    # Step 3 — supplemental multipliers (one per type, all independent)
+    # Step 2 — supplemental multipliers (one per type, all independent)
     supp_multipliers = []
 
     for supp_type in supplemental_types:
@@ -344,8 +333,8 @@ def final_probability(
     if not supp_multipliers:
         supp_multipliers = [1.0]
 
-    # Step 4 — compose all multipliers on top of base
-    profile_multiplier = ec_multiplier
+    # Step 3 — compose all multipliers on top of base
+    profile_multiplier = 1.0
     for m in supp_multipliers:
         profile_multiplier *= m
 
@@ -356,7 +345,6 @@ def final_probability(
         "probability":        probability,
         "display_percent":    f"{round(probability * 100)}%",
         "base_probability":   base["probability"],
-        "ec_multiplier":      ec_multiplier,
         "supp_multipliers":   supp_multipliers,
         "profile_multiplier": round(profile_multiplier, 6),
         "confidence":         base["confidence"],
@@ -365,6 +353,5 @@ def final_probability(
         "std_admitted":       base["std_admitted"],
         "data_limited":       base["data_limited"],
         "disclaimer":         base["disclaimer"],
-        "ec_considered":      ec_considered,
         "mode":               base["mode"],
     }

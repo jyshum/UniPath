@@ -40,6 +40,10 @@ Score on four dimensions, each 0-10:
 2. Self-awareness - do they understand why they want this program?
 3. Curiosity - do they show genuine intellectual interest beyond grades?
 4. Fit - does the answer reflect real understanding of this program?
+5. Leadership - did they lead, not just participate?
+6. Sustained commitment - multi-year involvement, not one-off?
+7. Community impact - did their work meaningfully affect others?
+9. Program relevance - does it connect to their intended field of study?
 
 Return ONLY a JSON object, nothing else, no markdown fences:
 {{"clarity": 8, "self_awareness": 7, "curiosity": 6, "fit": 9, "reasoning": "one sentence"}}
@@ -59,15 +63,14 @@ def _mode1_multiplier(avg: float) -> float:
 
 
 def _mode3_multiplier(avg: float) -> float:
-    if avg >= 8.5:   return 1.15
-    elif avg >= 7.0: return 1.08
-    elif avg >= 5.0: return 1.00
-    elif avg >= 3.0: return 0.88
-    else:            return 0.80
+    if avg >= 8.5:   return 2.00
+    elif avg >= 7.0: return 1.85
+    elif avg >= 5.0: return 1.70
+    elif avg >= 3.0: return 1.35
+    else:            return 1.00
 
 
 # ── Internal Ollama caller ────────────────────────────────────────────────────
-
 def _call_ollama(prompt: str) -> dict | None:
     """
     Calls Ollama llama3.2. Returns parsed JSON dict or None on any failure.

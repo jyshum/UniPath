@@ -160,7 +160,7 @@ export default function SchoolProgramSelector({ school, program, onSchool, onPro
 
       {/* Program — slides in once school is chosen */}
       {school && (
-        <div className="space-y-1.5 animate-fade-up">
+        <div className="relative z-10 space-y-1.5 animate-fade-up">
           <label className="block text-xs font-medium tracking-widest uppercase text-[#f5f5f0]/40">
             Program
           </label>

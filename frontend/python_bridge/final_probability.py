@@ -10,7 +10,7 @@ import os
 _project_root = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..')
 sys.path.insert(0, os.path.normpath(_project_root))
 
-from calibrate import final_probability, ADMITTED_PROFILES  # noqa: E402
+from core.calibrate import final_probability, ADMITTED_PROFILES  # noqa: E402
 
 
 def main() -> None:

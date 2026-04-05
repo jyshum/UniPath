@@ -20,7 +20,7 @@ export const PROGRAM_LABELS: Record<string, string> = {
 }
 
 export const PROGRAMS_BY_SCHOOL: Record<string, string[]> = {
-  'UBC Vancouver':           ['ENGINEERING', 'SCIENCE', 'BUSINESS', 'COMPUTER_SCIENCE', 'HEALTH', 'ARTS'],
+  'UBC Vancouver':           ['ENGINEERING', 'SCIENCE', 'BUSINESS', 'HEALTH', 'ARTS'],
   'University of Waterloo':  ['COMPUTER_SCIENCE', 'ENGINEERING'],
   'University of Toronto':   ['ENGINEERING', 'COMPUTER_SCIENCE', 'BUSINESS', 'SCIENCE'],
   'Western University':      ['BUSINESS'],

@@ -4,7 +4,7 @@ import json
 import sqlite3
 import pandas as pd
 from pathlib import Path
-import calibrate
+from core import calibrate
 
 DB_PATH = "database/unipath.db"
 DEFAULT_TOLERANCE = 2.0

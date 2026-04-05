@@ -9,5 +9,5 @@ __pycache__/
 credentials.json
 .gitattributes
 reccommend.py
-.pytest_cache/
-test_calibrate_smoke.py
+app.py
+data/reddit_agent_progress.txt
