@@ -1,15 +1,34 @@
 // lib/pythonBridge.ts
-// Spawns a Python script, sends JSON via stdin, reads JSON from stdout.
-// Scripts live in frontend/python_bridge/ and are run with process.cwd() = frontend/
+// In production (PYTHON_API_URL set): calls the FastAPI server on Railway via HTTP.
+// In local dev (no PYTHON_API_URL): spawns a Python subprocess as before.
 
 import { spawn } from 'child_process'
 import path from 'path'
 
+const SCRIPT_TO_ENDPOINT: Record<string, string> = {
+  'final_probability.py': 'final-probability',
+  'base_probability.py':  'base-probability',
+}
+
 export async function callPython(scriptName: string, input: object): Promise<object> {
+  const apiUrl = process.env.PYTHON_API_URL
+
+  if (apiUrl) {
+    const endpoint = SCRIPT_TO_ENDPOINT[scriptName] ?? scriptName.replace('.py', '').replace(/_/g, '-')
+    const res = await fetch(`${apiUrl}/${endpoint}`, {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify(input),
+    })
+    if (!res.ok) throw new Error(`Python API error: ${res.status}`)
+    return res.json()
+  }
+
+  // Local dev: spawn subprocess
   return new Promise((resolve, reject) => {
     const scriptPath = path.join(process.cwd(), 'python_bridge', scriptName)
-    const pythonBin = process.env.PYTHON_PATH ?? 'python3'
-    const proc = spawn(pythonBin, [scriptPath])
+    const pythonBin  = process.env.PYTHON_PATH ?? 'python3'
+    const proc       = spawn(pythonBin, [scriptPath])
 
     let stdout = ''
     let stderr = ''
