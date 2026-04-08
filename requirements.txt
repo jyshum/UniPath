@@ -1,4 +1,8 @@
+fastapi
+uvicorn[standard]
 pandas
-spacy
+scipy
+sqlalchemy
 python-dotenv
-sqlachemy
+requests
+
