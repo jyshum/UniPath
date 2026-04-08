@@ -1,12 +1,9 @@
 import re
 import pandas as pd
-import spacy
 from pathlib import Path
 
 BC_CLEANED_PATH = Path("data/cleaned/bc_cleaned.csv")
 BC_EXTRACTED_PATH = Path("data/cleaned/bc_extracted.csv")
-
-nlp = spacy.load("en_core_web_sm")
 
 EMPTY_RESPONSES = {
     "na", "n/a", "none", "none required", "not needed", "not applicable",
@@ -122,15 +119,8 @@ def tag_ec(raw) -> list[str]:
     if any(kw in text for kw in entrepreneurship_keywords):
         tags.append("ENTREPRENEURSHIP")
 
-    # spaCy fallback — only if nothing matched
     if not tags:
-        doc = nlp(str(raw))
-        key_terms = [token.lemma_.lower() for token in doc
-                     if token.pos_ in ("NOUN", "PROPN") and not token.is_stop]
-        if key_terms:
-            tags.append("OTHER")
-        else:
-            tags.append("NONE")
+        tags.append("OTHER")
 
     return tags
 
@@ -272,8 +262,6 @@ def tag_program(raw) -> str:
     if any(kw in text for kw in ["education", "teaching", "teacher", "bed"]):
         return "EDUCATION"
 
-    # spaCy fallback
-    doc = nlp(str(raw))
     return "OTHER"
 
 def extract_row(row: pd.Series) -> dict:
