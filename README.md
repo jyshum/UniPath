@@ -123,7 +123,9 @@ The app runs at `http://localhost:3000`.
 
 Functionally complete for v1. See [PROJECT_STATE.md](PROJECT_STATE.md) for full architecture details, known issues, and next steps.
 
-**Deployment is not yet live.** The Python bridge requires a FastAPI sidecar (Railway/Render) — subprocess spawning does not work in Vercel serverless environments.
+**Live at:** https://uni-path-nine.vercel.app
+
+The Python bridge requires a FastAPI sidecar (Railway/Render) for full production deployment — subprocess spawning does not work in Vercel serverless environments.
 
 ---
 
