@@ -12,7 +12,10 @@
 # the same call — they are always called separately.
 
 import json
+import os
 import ollama
+
+DISABLE_OLLAMA = os.environ.get("DISABLE_OLLAMA", "").lower() in ("1", "true", "yes")
 
 # ── Prompts ───────────────────────────────────────────────────────────────────
 
@@ -76,7 +79,10 @@ def _call_ollama(prompt: str) -> dict | None:
     Calls Ollama llama3.2. Returns parsed JSON dict or None on any failure.
     Strips markdown fences before parsing. Logs raw response on parse error.
     Matches the exact pattern from pipeline/reddit_agent.py.
+    Returns None immediately if DISABLE_OLLAMA is set — callers treat None as multiplier=1.0.
     """
+    if DISABLE_OLLAMA:
+        return None
     try:
         response = ollama.chat(
             model="llama3.2",

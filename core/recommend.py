@@ -6,7 +6,7 @@ import pandas as pd
 from pathlib import Path
 from core import calibrate
 
-DB_PATH = "database/unipath.db"
+DB_PATH = Path(__file__).parent.parent / "database" / "unipath.db"
 DEFAULT_TOLERANCE = 2.0
 
 

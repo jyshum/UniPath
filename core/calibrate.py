@@ -3,11 +3,12 @@
 # Replaces the previous Bayesian (accepted vs rejected DB rows) approach entirely.
 
 import sqlite3
+from pathlib import Path
 from scipy.stats import norm
 from core import ec_scorer
 from core.ec_scorer import score_profile
 
-DB_PATH = "database/unipath.db"
+DB_PATH = Path(__file__).parent.parent / "database" / "unipath.db"
 
 # ── Data structures ───────────────────────────────────────────────────────────
 
