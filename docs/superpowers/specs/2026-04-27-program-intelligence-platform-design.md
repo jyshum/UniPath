@@ -38,13 +38,22 @@ User submissions ──> API endpoint ──> Normalize ──> Tag ────
 
 All frontend work is blocked on this phase. The Program Intelligence Pages need sufficient data density to look credible.
 
-### 1a. Backfill null program_category rows
+### 1a. ~~Backfill null program_category rows~~ DONE
 
-**Problem:** ~415 rows in the DB have `program_raw` populated but `program_category`, `ec_tags`, and `circumstance_tags` are null. These were loaded from BC/Ontario spreadsheets before `extract_fields.py` existed.
+All 849 rows already have `program_category`, `ec_tags`, and `circumstance_tags` populated. No backfill needed.
 
-**Fix:** Python script that queries all rows where `program_category IS NULL`, runs `tag_program()`, `tag_ec()`, and `tag_circumstances()` against the existing `program_raw`, `ec_raw`, and `circumstances_raw` fields, and updates in place.
+**Current data density (combos with 20+ records):**
+- UBC Vancouver Science: 86 (72 accepted, 2 rejected)
+- UBC Vancouver Engineering: 72 (53 accepted, 5 rejected)
+- UBC Vancouver Business: 51 (38 accepted, 6 rejected)
+- Western University Business: 44 (32 accepted, 4 rejected)
+- UBC Vancouver Arts: 32 (27 accepted, 0 rejected)
+- University of Waterloo Engineering: 28 (23 accepted, 3 rejected)
+- University of Toronto Engineering: 26 (18 accepted, 3 rejected)
+- Western University Health: 23 (14 accepted, 1 rejected)
+- UBC Vancouver Health: 20 (17 accepted, 2 rejected)
 
-**Success benchmark:** 400+ rows gain a non-null `program_category`. If significantly fewer are categorized, inspect the unmatched `program_raw` strings and expand `tag_program()` keyword lists before proceeding.
+**Note:** Data is heavily skewed towards acceptances. Rejection data is thin across all combos. EC tag breakdowns should focus on accepted profiles rather than accepted-vs-rejected comparison.
 
 ### 1b. LLM model migration + eval
 
