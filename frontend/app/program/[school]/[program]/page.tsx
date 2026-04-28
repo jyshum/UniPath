@@ -1,6 +1,7 @@
 import GradeDistribution from '@/components/GradeDistribution'
 import ECBreakdown from '@/components/ECBreakdown'
 import WhereDoYouStand from '@/components/WhereDoYouStand'
+import SubmitOutcomeForm from '@/components/SubmitOutcomeForm'
 import Link from 'next/link'
 import { ProgramStats } from '@/lib/types'
 
@@ -116,6 +117,11 @@ export default async function ProgramPage({
             gradeRange={stats.grade_range}
             totalRecords={stats.total_records}
           />
+        </div>
+
+        {/* Submit form */}
+        <div className="mb-10 p-6 rounded-xl border border-white/10 bg-white/[0.03]">
+          <SubmitOutcomeForm defaultSchool={school} defaultProgram={program} />
         </div>
 
         {/* Data provenance */}
