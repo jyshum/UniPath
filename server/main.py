@@ -14,7 +14,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
 from core.calibrate import final_probability, ADMITTED_PROFILES
-from core.recommend import find_similar
+from core.recommend import find_similar, program_stats, list_programs
 
 app = FastAPI()
 
@@ -87,4 +87,17 @@ def get_final_probability(req: ProbabilityRequest):
     else:
         result["similar_students"] = None
 
+    return result
+
+
+@app.get("/programs")
+def get_programs():
+    return list_programs(min_records=10)
+
+
+@app.get("/programs/{school}/{program}")
+def get_program_stats(school: str, program: str):
+    result = program_stats(school, program.upper())
+    if result["total_records"] == 0:
+        return {"error": "no_data"}
     return result

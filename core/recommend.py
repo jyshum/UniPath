@@ -1,6 +1,7 @@
 # recommend.py
 
 import json
+import json as _json
 import sqlite3
 import pandas as pd
 from pathlib import Path
@@ -169,6 +170,130 @@ def summarize_results(df: pd.DataFrame, school: str = None) -> dict:
         "total_similar": len(df),
         "breakdown": breakdown,
     }
+
+GRADE_BUCKETS = [
+    ("< 80", 0, 79.99),
+    ("80-84", 80, 84.99),
+    ("85-89", 85, 89.99),
+    ("90-94", 90, 94.99),
+    ("95-100", 95, 100),
+]
+
+
+def program_stats(school: str, program_category: str) -> dict:
+    """
+    Returns aggregated stats for a school+program combo:
+    - grade_distribution: list of {bucket, accepted, rejected, waitlisted, deferred}
+    - ec_breakdown: list of {tag, pct} among accepted students
+    - total_records, avg_admitted_grade, grade_range, data_sources
+    """
+    conn = get_connection()
+    program_category = program_category.upper()
+
+    rows = conn.execute(
+        "SELECT decision, core_avg, ec_tags, source FROM students "
+        "WHERE school_normalized = ? AND program_category = ? AND core_avg IS NOT NULL",
+        (school, program_category),
+    ).fetchall()
+    conn.close()
+
+    if not rows:
+        return {
+            "school": school,
+            "program": program_category,
+            "grade_distribution": [],
+            "ec_breakdown": [],
+            "total_records": 0,
+            "accepted_count": 0,
+            "avg_admitted_grade": None,
+            "grade_range": None,
+            "data_sources": {},
+        }
+
+    # Grade distribution
+    grade_dist = []
+    for label, lo, hi in GRADE_BUCKETS:
+        bucket = {"bucket": label, "accepted": 0, "rejected": 0, "waitlisted": 0, "deferred": 0}
+        for decision, grade, _, _ in rows:
+            if lo <= grade <= hi and decision:
+                key = decision.lower()
+                if key in bucket:
+                    bucket[key] += 1
+        grade_dist.append(bucket)
+
+    # EC breakdown (accepted students only)
+    from collections import Counter
+    ec_counter = Counter()
+    accepted_count = 0
+    accepted_grades = []
+
+    for decision, grade, ec_tags_str, source in rows:
+        if decision == "ACCEPTED":
+            accepted_count += 1
+            accepted_grades.append(grade)
+            if ec_tags_str:
+                try:
+                    tags = _json.loads(ec_tags_str)
+                    for tag in tags:
+                        if tag not in ("NONE", "OTHER"):
+                            ec_counter[tag] += 1
+                except (_json.JSONDecodeError, TypeError):
+                    pass
+
+    ec_breakdown = [
+        {"tag": tag, "count": count, "pct": round(count / accepted_count * 100)}
+        for tag, count in ec_counter.most_common()
+    ] if accepted_count > 0 else []
+
+    # Data sources
+    from collections import Counter as _Counter
+    source_counter = _Counter(source for _, _, _, source in rows)
+
+    return {
+        "school": school,
+        "program": program_category,
+        "grade_distribution": grade_dist,
+        "ec_breakdown": ec_breakdown,
+        "total_records": len(rows),
+        "accepted_count": accepted_count,
+        "avg_admitted_grade": round(sum(accepted_grades) / len(accepted_grades), 1) if accepted_grades else None,
+        "grade_range": {
+            "min": round(min(accepted_grades), 1),
+            "max": round(max(accepted_grades), 1),
+        } if accepted_grades else None,
+        "data_sources": dict(source_counter),
+    }
+
+
+def list_programs(min_records: int = 10) -> list[dict]:
+    """
+    Returns all school+program combos with at least min_records,
+    sorted by total descending.
+    """
+    conn = get_connection()
+    rows = conn.execute(
+        "SELECT school_normalized, program_category, COUNT(*) as cnt, "
+        "SUM(CASE WHEN decision = 'ACCEPTED' THEN 1 ELSE 0 END) as accepted "
+        "FROM students "
+        "WHERE school_normalized IS NOT NULL AND program_category IS NOT NULL "
+        "AND core_avg IS NOT NULL "
+        "GROUP BY school_normalized, program_category "
+        "HAVING cnt >= ? "
+        "ORDER BY cnt DESC",
+        (min_records,),
+    ).fetchall()
+    conn.close()
+
+    return [
+        {
+            "school": school,
+            "program": program,
+            "total": total,
+            "accepted": accepted,
+        }
+        for school, program, total, accepted in rows
+    ]
+
 
 def print_summary(summary: dict):
     """Pretty-prints a single school summary."""
