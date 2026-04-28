@@ -8,6 +8,7 @@ from pathlib import Path
 from sqlalchemy.orm import Session
 
 from database.models import Student, init_db, get_engine
+from eval.schemas import AdmissionExtraction
 from pipeline.normalize import normalize_row
 from pipeline.normalize import normalize_school
 from pipeline.extract_fields import extract_row
@@ -15,7 +16,7 @@ from pipeline.extract_fields import extract_row
 
 HEADERS = {"User-Agent": "unipath-ai/1.0 (research project)"}
 
-SUBREDDITS = ["OntarioGrade12s", "BCGrade12s"]
+SUBREDDITS = ["OntarioGrade12s", "BCGrade12s", "AlbertaGrade12s"]
 
 SEARCH_QUERIES = [
 
@@ -202,30 +203,21 @@ Post text:
 
 def extract_admission_data(post_text: str) -> dict | None:
     """
-    Uses a local Ollama model to extract structured admissions data from post rext
-    returns a dict if relevant data found, none otherwise
+    Uses a local Ollama model with structured output to extract admissions data.
+    Returns a dict if relevant data found, None otherwise.
     """
     prompt = EXTRACTION_PROMPT.format(post_text=post_text[:2000])
 
     try:
         response = ollama.chat(
-            model = "llama3.2",
+            model="llama3.2",
             messages=[{"role": "user", "content": prompt}],
+            format=AdmissionExtraction.model_json_schema(),
             options={"temperature": 0},
         )
         raw = response["message"]["content"].strip()
-
-        # strip markdown code fences if model adds them
-        if raw.startswith("```"):
-            raw = raw.split("```")[1]
-            if raw.startswith("json"):
-                raw = raw[4:]
-        raw = raw.strip()
-
-        data = json.loads(raw)
-        return data
-    except json.JSONDecodeError:
-        return None
+        extraction = AdmissionExtraction.model_validate_json(raw)
+        return extraction.model_dump()
     except Exception as e:
         print(f"    Ollama error: {e}")
         return None

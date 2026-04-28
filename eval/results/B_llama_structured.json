@@ -1,0 +1,722 @@
+{
+  "config": "B_llama_structured",
+  "model": "llama3.2",
+  "structured": true,
+  "total": 50,
+  "json_valid": 50,
+  "json_valid_pct": 100.0,
+  "relevance_accuracy_pct": 96.0,
+  "field_accuracy": {
+    "school": 50.0,
+    "program": 80.0,
+    "decision": 100.0,
+    "core_avg": 100.0,
+    "ec_raw": 22.5,
+    "province": 82.5,
+    "citizenship": 82.5
+  },
+  "avg_latency_s": 2.82,
+  "total_time_s": 140.9,
+  "predictions": [
+    {
+      "index": 0,
+      "predicted": {
+        "relevant": true,
+        "school": "UBC",
+        "program": "Engineering",
+        "decision": "Accepted",
+        "core_avg": 94.5,
+        "ec_raw": "robotics club, volunteering, and played varsity basketball",
+        "province": "BC",
+        "citizenship": "Canadian"
+      },
+      "valid": true
+    },
+    {
+      "index": 1,
+      "predicted": {
+        "relevant": false,
+        "school": null,
+        "program": null,
+        "decision": null,
+        "core_avg": null,
+        "ec_raw": null,
+        "province": null,
+        "citizenship": null
+      },
+      "valid": true
+    },
+    {
+      "index": 2,
+      "predicted": {
+        "relevant": true,
+        "school": "UofT",
+        "program": "Engineering",
+        "decision": "Rejected",
+        "core_avg": 91.2,
+        "ec_raw": null,
+        "province": "Ontario",
+        "citizenship": "Canada"
+      },
+      "valid": true
+    },
+    {
+      "index": 3,
+      "predicted": {
+        "relevant": true,
+        "school": "Western University",
+        "program": "Commerce",
+        "decision": "Accepted",
+        "core_avg": 93.8,
+        "ec_raw": "DECA, student council president, and part-time job at a restaurant",
+        "province": "Ontario",
+        "citizenship": "China"
+      },
+      "valid": true
+    },
+    {
+      "index": 4,
+      "predicted": {
+        "relevant": true,
+        "school": "Western University",
+        "program": "Med Sci",
+        "decision": "Accepted",
+        "core_avg": 96.0,
+        "ec_raw": null,
+        "province": "Ontario",
+        "citizenship": null
+      },
+      "valid": true
+    },
+    {
+      "index": 5,
+      "predicted": {
+        "relevant": true,
+        "school": "Waterloo",
+        "program": "Computer Science",
+        "decision": "Accepted",
+        "core_avg": 97.3,
+        "ec_raw": "lots of hackathons and personal coding projects",
+        "province": "Ontario",
+        "citizenship": null
+      },
+      "valid": true
+    },
+    {
+      "index": 6,
+      "predicted": {
+        "relevant": true,
+        "school": "Queens",
+        "program": "Commerce",
+        "decision": "Waitlisted",
+        "core_avg": 92.0,
+        "ec_raw": "debate club, varsity swimming",
+        "province": "Ontario",
+        "citizenship": "Canadian"
+      },
+      "valid": true
+    },
+    {
+      "index": 7,
+      "predicted": {
+        "relevant": true,
+        "school": "Western University",
+        "program": "Business Administration",
+        "decision": "Accepted",
+        "core_avg": 95.6,
+        "ec_raw": "student council, ran a small business selling custom phone cases, and volunteered at a food bank",
+        "province": "Ontario",
+        "citizenship": "Canada"
+      },
+      "valid": true
+    },
+    {
+      "index": 8,
+      "predicted": {
+        "relevant": true,
+        "school": "University of Toronto",
+        "program": "Life Sciences",
+        "decision": "Deferred",
+        "core_avg": 89.4,
+        "ec_raw": "not many ecs tbh just some tutoring",
+        "province": "Ontario",
+        "citizenship": null
+      },
+      "valid": true
+    },
+    {
+      "index": 9,
+      "predicted": {
+        "relevant": true,
+        "school": "McMaster",
+        "program": "Health Sciences",
+        "decision": "Waitlisted",
+        "core_avg": 97.0,
+        "ec_raw": null,
+        "province": "Ontario",
+        "citizenship": null
+      },
+      "valid": true
+    },
+    {
+      "index": 10,
+      "predicted": {
+        "relevant": true,
+        "school": "UBC",
+        "program": "Science",
+        "decision": "Accepted",
+        "core_avg": 91.0,
+        "ec_raw": "swim team, volunteered at the library",
+        "province": "BC",
+        "citizenship": "Canadian"
+      },
+      "valid": true
+    },
+    {
+      "index": 11,
+      "predicted": {
+        "relevant": true,
+        "school": "Waterloo",
+        "program": "Engineering",
+        "decision": "Rejected",
+        "core_avg": 93.8,
+        "ec_raw": "robotics team captain, math contest CEMC, and volunteering at hospital",
+        "province": "Ontario",
+        "citizenship": "Canadian"
+      },
+      "valid": true
+    },
+    {
+      "index": 12,
+      "predicted": {
+        "relevant": true,
+        "school": "McMaster",
+        "program": "Life Sciences",
+        "decision": "Accepted",
+        "core_avg": 90.1,
+        "ec_raw": "recreational soccer, volunteering hours",
+        "province": "Ontario",
+        "citizenship": null
+      },
+      "valid": true
+    },
+    {
+      "index": 13,
+      "predicted": {
+        "relevant": false,
+        "school": null,
+        "program": null,
+        "decision": null,
+        "core_avg": null,
+        "ec_raw": null,
+        "province": null,
+        "citizenship": null
+      },
+      "valid": true
+    },
+    {
+      "index": 14,
+      "predicted": {
+        "relevant": true,
+        "school": "University of British Columbia",
+        "program": "Arts",
+        "decision": "Accepted",
+        "core_avg": 87.2,
+        "ec_raw": "tons of creative writing, debate team, and I ran a blog about social justice issues.",
+        "province": "Alberta",
+        "citizenship": null
+      },
+      "valid": true
+    },
+    {
+      "index": 15,
+      "predicted": {
+        "relevant": true,
+        "school": "Schulich",
+        "program": "Business",
+        "decision": "Rejected",
+        "core_avg": 91.5,
+        "ec_raw": "DECA and some volunteer experience",
+        "province": "Ontario",
+        "citizenship": null
+      },
+      "valid": true
+    },
+    {
+      "index": 16,
+      "predicted": {
+        "relevant": true,
+        "school": "UBC",
+        "program": "Nursing",
+        "decision": "Accepted",
+        "core_avg": 93.2,
+        "ec_raw": "volunteered at a care home for 2 years and did hospital volunteering",
+        "province": "BC",
+        "citizenship": "Canadian"
+      },
+      "valid": true
+    },
+    {
+      "index": 17,
+      "predicted": {
+        "relevant": false,
+        "school": null,
+        "program": null,
+        "decision": null,
+        "core_avg": null,
+        "ec_raw": null,
+        "province": null,
+        "citizenship": null
+      },
+      "valid": true
+    },
+    {
+      "index": 18,
+      "predicted": {
+        "relevant": true,
+        "school": "Simon Fraser University",
+        "program": "Business Administration",
+        "decision": "Accepted",
+        "core_avg": 90.7,
+        "ec_raw": "part-time job, volunteered with habitat for humanity, and played club basketball",
+        "province": "British Columbia",
+        "citizenship": null
+      },
+      "valid": true
+    },
+    {
+      "index": 19,
+      "predicted": {
+        "relevant": true,
+        "school": "UBC",
+        "program": "Engineering",
+        "decision": "Waitlisted",
+        "core_avg": 93.1,
+        "ec_raw": "coding projects, first robotics, and volunteer tutoring",
+        "province": "British Columbia",
+        "citizenship": "India"
+      },
+      "valid": true
+    },
+    {
+      "index": 20,
+      "predicted": {
+        "relevant": true,
+        "school": "Ottawa Engineering",
+        "program": "Engineering",
+        "decision": "Accepted",
+        "core_avg": 88.0,
+        "ec_raw": null,
+        "province": "Ontario",
+        "citizenship": null
+      },
+      "valid": true
+    },
+    {
+      "index": 21,
+      "predicted": {
+        "relevant": false,
+        "school": null,
+        "program": null,
+        "decision": null,
+        "core_avg": null,
+        "ec_raw": null,
+        "province": null,
+        "citizenship": null
+      },
+      "valid": true
+    },
+    {
+      "index": 22,
+      "predicted": {
+        "relevant": true,
+        "school": "University of Toronto",
+        "program": "Commerce",
+        "decision": "Accepted",
+        "core_avg": 96.1,
+        "ec_raw": "DECA provincials, student council treasurer, started a tutoring business, and volunteered at a soup kitchen.",
+        "province": "Ontario",
+        "citizenship": "Canadian"
+      },
+      "valid": true
+    },
+    {
+      "index": 23,
+      "predicted": {
+        "relevant": true,
+        "school": "Waterloo",
+        "program": "Mathematics",
+        "decision": "Rejected",
+        "core_avg": 94.2,
+        "ec_raw": "AMC/CEMC contests and coding club",
+        "province": "Ontario",
+        "citizenship": "Korea"
+      },
+      "valid": true
+    },
+    {
+      "index": 24,
+      "predicted": {
+        "relevant": true,
+        "school": "McMaster",
+        "program": "Health Sciences",
+        "decision": "Accepted",
+        "core_avg": 98.2,
+        "ec_raw": "research experience with a prof, hospital volunteering, president of science club, varsity volleyball",
+        "province": "Ontario",
+        "citizenship": null
+      },
+      "valid": true
+    },
+    {
+      "index": 25,
+      "predicted": {
+        "relevant": true,
+        "school": "UBC",
+        "program": "Kinesiology",
+        "decision": "Accepted",
+        "core_avg": 88.5,
+        "ec_raw": "Played rep hockey and did coaching.",
+        "province": "BC",
+        "citizenship": "Canada"
+      },
+      "valid": true
+    },
+    {
+      "index": 26,
+      "predicted": {
+        "relevant": true,
+        "school": "Queen's",
+        "program": "Engineering",
+        "decision": "Deferred",
+        "core_avg": 91.7,
+        "ec_raw": "robotics club, math tutoring, and some volunteer hours",
+        "province": "Ontario",
+        "citizenship": null
+      },
+      "valid": true
+    },
+    {
+      "index": 27,
+      "predicted": {
+        "relevant": false,
+        "school": null,
+        "program": null,
+        "decision": null,
+        "core_avg": null,
+        "ec_raw": null,
+        "province": null,
+        "citizenship": null
+      },
+      "valid": true
+    },
+    {
+      "index": 28,
+      "predicted": {
+        "relevant": true,
+        "school": "UBC",
+        "program": "Computer Science",
+        "decision": "Accepted",
+        "core_avg": 95.8,
+        "ec_raw": "coding since grade 9, hackathons (won HackTheNorth), built a couple apps, math competitions",
+        "province": "BC",
+        "citizenship": null
+      },
+      "valid": true
+    },
+    {
+      "index": 29,
+      "predicted": {
+        "relevant": true,
+        "school": "Western University",
+        "program": "Med Sci",
+        "decision": "Rejected",
+        "core_avg": 94.3,
+        "ec_raw": "hospital volunteering, research with a prof, and played badminton",
+        "province": "Ontario",
+        "citizenship": "permanent resident"
+      },
+      "valid": true
+    },
+    {
+      "index": 30,
+      "predicted": {
+        "relevant": true,
+        "school": "Carleton",
+        "program": "Computer Science",
+        "decision": "Accepted",
+        "core_avg": 86.0,
+        "ec_raw": null,
+        "province": "Ontario",
+        "citizenship": null
+      },
+      "valid": true
+    },
+    {
+      "index": 31,
+      "predicted": {
+        "relevant": true,
+        "school": "UofT",
+        "program": "Engineering",
+        "decision": "Accepted",
+        "core_avg": 91.1,
+        "ec_raw": "robotics, science olympiad, and MUN",
+        "province": "Ontario",
+        "citizenship": "United Arab Emirates"
+      },
+      "valid": true
+    },
+    {
+      "index": 32,
+      "predicted": {
+        "relevant": true,
+        "school": "UAlberta",
+        "program": "Engineering",
+        "decision": "Accepted",
+        "core_avg": 92.4,
+        "ec_raw": "volunteering and played hockey",
+        "province": "Alberta",
+        "citizenship": "Canada"
+      },
+      "valid": true
+    },
+    {
+      "index": 33,
+      "predicted": {
+        "relevant": false,
+        "school": null,
+        "program": null,
+        "decision": null,
+        "core_avg": null,
+        "ec_raw": null,
+        "province": null,
+        "citizenship": null
+      },
+      "valid": true
+    },
+    {
+      "index": 34,
+      "predicted": {
+        "relevant": true,
+        "school": "UBC",
+        "program": "Sciences",
+        "decision": "Accepted",
+        "core_avg": 89.9,
+        "ec_raw": "played rep soccer and did some tutoring on the side",
+        "province": "BC",
+        "citizenship": "Canada/US"
+      },
+      "valid": true
+    },
+    {
+      "index": 35,
+      "predicted": {
+        "relevant": true,
+        "school": "UofT",
+        "program": "Computer Science",
+        "decision": "Waitlisted",
+        "core_avg": 95.4,
+        "ec_raw": "competitive programming, math contests, and open source contributions",
+        "province": "Ontario",
+        "citizenship": "Canadian"
+      },
+      "valid": true
+    },
+    {
+      "index": 36,
+      "predicted": {
+        "relevant": true,
+        "school": "Simon Fraser University",
+        "program": "Science",
+        "decision": "Accepted",
+        "core_avg": 85.3,
+        "ec_raw": "just played basketball recreationally",
+        "province": "British Columbia",
+        "citizenship": null
+      },
+      "valid": true
+    },
+    {
+      "index": 37,
+      "predicted": {
+        "relevant": true,
+        "school": "University of Guelph",
+        "program": "Biological Science",
+        "decision": "Accepted",
+        "core_avg": 87.6,
+        "ec_raw": "4H club, environmental volunteering",
+        "province": "Ontario",
+        "citizenship": null
+      },
+      "valid": true
+    },
+    {
+      "index": 38,
+      "predicted": {
+        "relevant": false,
+        "school": null,
+        "program": null,
+        "decision": null,
+        "core_avg": null,
+        "ec_raw": null,
+        "province": null,
+        "citizenship": null
+      },
+      "valid": true
+    },
+    {
+      "index": 39,
+      "predicted": {
+        "relevant": true,
+        "school": "McMaster",
+        "program": "Nursing",
+        "decision": "Rejected",
+        "core_avg": 88.4,
+        "ec_raw": "hospital volunteering and first aid certification",
+        "province": "Ontario",
+        "citizenship": null
+      },
+      "valid": true
+    },
+    {
+      "index": 40,
+      "predicted": {
+        "relevant": true,
+        "school": "Western University",
+        "program": "Business Administration",
+        "decision": "Accepted",
+        "core_avg": 96.8,
+        "ec_raw": "DECA internationals, founded a nonprofit, varsity cross country, and part time at a bank.",
+        "province": "Ontario",
+        "citizenship": "Canadian"
+      },
+      "valid": true
+    },
+    {
+      "index": 41,
+      "predicted": {
+        "relevant": true,
+        "school": "University of Victoria",
+        "program": "Engineering",
+        "decision": "Accepted",
+        "core_avg": 88.2,
+        "ec_raw": "Did some coding projects and volunteer tutoring.",
+        "province": "British Columbia",
+        "citizenship": null
+      },
+      "valid": true
+    },
+    {
+      "index": 42,
+      "predicted": {
+        "relevant": true,
+        "school": "Waterloo",
+        "program": "Mechatronics Engineering",
+        "decision": "Accepted",
+        "core_avg": 96.5,
+        "ec_raw": "First robotics team lead, math contest (CEMC top 25%), personal projects in embedded systems, and volunteered at a makerspace.",
+        "province": "Ontario",
+        "citizenship": null
+      },
+      "valid": true
+    },
+    {
+      "index": 43,
+      "predicted": {
+        "relevant": true,
+        "school": "UBC",
+        "program": "Sauder",
+        "decision": "Rejected",
+        "core_avg": 91.2,
+        "ec_raw": "Had a part time job and some volunteering.",
+        "province": "Alberta",
+        "citizenship": "Philippines"
+      },
+      "valid": true
+    },
+    {
+      "index": 44,
+      "predicted": {
+        "relevant": false,
+        "school": null,
+        "program": null,
+        "decision": null,
+        "core_avg": null,
+        "ec_raw": null,
+        "province": null,
+        "citizenship": null
+      },
+      "valid": true
+    },
+    {
+      "index": 45,
+      "predicted": {
+        "relevant": true,
+        "school": "York University",
+        "program": "Schulich School of Business",
+        "decision": "Accepted",
+        "core_avg": 94.7,
+        "ec_raw": "DECA, Model UN, student council VP, and worked part-time at a retail store",
+        "province": "Ontario",
+        "citizenship": "Canadian"
+      },
+      "valid": true
+    },
+    {
+      "index": 46,
+      "predicted": {
+        "relevant": true,
+        "school": "UBC",
+        "program": "Psychology (Arts)",
+        "decision": "Accepted",
+        "core_avg": 86.1,
+        "ec_raw": "peer tutoring, volunteering at a crisis line",
+        "province": "BC",
+        "citizenship": null
+      },
+      "valid": true
+    },
+    {
+      "index": 47,
+      "predicted": {
+        "relevant": true,
+        "school": "University of Toronto",
+        "program": "Commerce",
+        "decision": "Deferred",
+        "core_avg": 93.5,
+        "ec_raw": "DECA and part-time job",
+        "province": "Ontario",
+        "citizenship": null
+      },
+      "valid": true
+    },
+    {
+      "index": 48,
+      "predicted": {
+        "relevant": true,
+        "school": "Waterloo",
+        "program": "Computer Science",
+        "decision": "Rejected",
+        "core_avg": 95.1,
+        "ec_raw": "competitive programming, personal projects (built a full stack app), and volunteered at code.org workshop.",
+        "province": "Ontario",
+        "citizenship": "Canadian"
+      },
+      "valid": true
+    },
+    {
+      "index": 49,
+      "predicted": {
+        "relevant": true,
+        "school": "McGill",
+        "program": "Science",
+        "decision": "Accepted",
+        "core_avg": 95.0,
+        "ec_raw": "Did science fair (nationals), tutoring, and played rep volleyball.",
+        "province": "BC",
+        "citizenship": "Canadian"
+      },
+      "valid": true
+    }
+  ]
+}

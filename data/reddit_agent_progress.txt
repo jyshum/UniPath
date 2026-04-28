@@ -118,3 +118,63 @@ BCGrade12s::UofT engineering accepted
 BCGrade12s::UofT life sci accepted
 BCGrade12s::Queens engineering accepted
 BCGrade12s::Western Ivey accepted
+AlbertaGrade12s::accepted engineering
+AlbertaGrade12s::rejected engineering
+AlbertaGrade12s::engineering admission
+AlbertaGrade12s::applied science accepted
+AlbertaGrade12s::got into engineering
+AlbertaGrade12s::engineering offer
+AlbertaGrade12s::ECE accepted
+AlbertaGrade12s::software engineering accepted
+AlbertaGrade12s::mechanical engineering accepted
+AlbertaGrade12s::chemical engineering accepted
+AlbertaGrade12s::accepted computer science
+AlbertaGrade12s::rejected computer science
+AlbertaGrade12s::CS accepted
+AlbertaGrade12s::CompSci accepted
+AlbertaGrade12s::got into CS
+AlbertaGrade12s::computer science offer
+AlbertaGrade12s::CS rejection
+AlbertaGrade12s::math CS accepted
+AlbertaGrade12s::accepted commerce
+AlbertaGrade12s::Sauder accepted
+AlbertaGrade12s::Ivey accepted
+AlbertaGrade12s::Schulich accepted
+AlbertaGrade12s::Beedie accepted
+AlbertaGrade12s::Rotman accepted
+AlbertaGrade12s::HBA accepted
+AlbertaGrade12s::BBA accepted
+AlbertaGrade12s::got into business
+AlbertaGrade12s::commerce rejection
+AlbertaGrade12s::Ivey AEO
+AlbertaGrade12s::accepted science
+AlbertaGrade12s::life sciences accepted
+AlbertaGrade12s::health sciences accepted
+AlbertaGrade12s::rejected science
+AlbertaGrade12s::got into science
+AlbertaGrade12s::biomed accepted
+AlbertaGrade12s::biochemistry accepted
+AlbertaGrade12s::kinesiology accepted
+AlbertaGrade12s::nursing accepted
+AlbertaGrade12s::pharmacy accepted
+AlbertaGrade12s::health sci accepted
+AlbertaGrade12s::McMaster health sci
+AlbertaGrade12s::rejected health sciences
+AlbertaGrade12s::physiotherapy accepted
+AlbertaGrade12s::accepted arts
+AlbertaGrade12s::social sciences accepted
+AlbertaGrade12s::got into arts
+AlbertaGrade12s::rejected arts
+AlbertaGrade12s::psychology accepted
+AlbertaGrade12s::UBC science accepted
+AlbertaGrade12s::UBC engineering accepted
+AlbertaGrade12s::UBC Sauder accepted
+AlbertaGrade12s::Waterloo CS accepted
+AlbertaGrade12s::Waterloo math accepted
+AlbertaGrade12s::Waterloo engineering accepted
+AlbertaGrade12s::McMaster life sci accepted
+AlbertaGrade12s::McMaster health sci accepted
+AlbertaGrade12s::UofT engineering accepted
+AlbertaGrade12s::UofT life sci accepted
+AlbertaGrade12s::Queens engineering accepted
+AlbertaGrade12s::Western Ivey accepted
