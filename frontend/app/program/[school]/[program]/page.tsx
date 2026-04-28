@@ -1,5 +1,6 @@
 import GradeDistribution from '@/components/GradeDistribution'
 import ECBreakdown from '@/components/ECBreakdown'
+import WhereDoYouStand from '@/components/WhereDoYouStand'
 import Link from 'next/link'
 import { ProgramStats } from '@/lib/types'
 
@@ -107,6 +108,15 @@ export default async function ProgramPage({
             <ECBreakdown entries={stats.ec_breakdown} acceptedCount={stats.accepted_count} />
           </div>
         )}
+
+        {/* Where Do You Stand */}
+        <div className="mb-10">
+          <WhereDoYouStand
+            avgAdmittedGrade={stats.avg_admitted_grade}
+            gradeRange={stats.grade_range}
+            totalRecords={stats.total_records}
+          />
+        </div>
 
         {/* Data provenance */}
         <div className="text-xs text-white/20 text-center mt-8">
