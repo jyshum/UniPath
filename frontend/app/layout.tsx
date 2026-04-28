@@ -18,8 +18,8 @@ const dmSans = DM_Sans({
 })
 
 export const metadata: Metadata = {
-  title:       'UniPath — Know Your Odds',
-  description: 'Calibrated university acceptance probabilities for Canadian students, based on real admission outcomes.',
+  title:       'UniPath — See What It Actually Takes',
+  description: 'Grade distributions and EC patterns from real Canadian university applicants.',
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
