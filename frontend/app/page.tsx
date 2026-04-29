@@ -1,11 +1,15 @@
 import ProgramCard from '@/components/ProgramCard'
+import CategoryFilter from '@/components/CategoryFilter'
 import { ProgramSummary } from '@/lib/types'
 
 const API_URL = process.env.PYTHON_API_URL ?? 'http://localhost:8000'
 
-async function getPrograms(): Promise<ProgramSummary[]> {
+async function getPrograms(category?: string): Promise<ProgramSummary[]> {
   try {
-    const res = await fetch(`${API_URL}/programs`, { cache: 'no-store' })
+    const url = category
+      ? `${API_URL}/programs?category=${encodeURIComponent(category)}`
+      : `${API_URL}/programs`
+    const res = await fetch(url, { cache: 'no-store' })
     if (!res.ok) return []
     return res.json()
   } catch {
@@ -13,8 +17,13 @@ async function getPrograms(): Promise<ProgramSummary[]> {
   }
 }
 
-export default async function Home() {
-  const programs = await getPrograms()
+export default async function Home({
+  searchParams,
+}: {
+  searchParams: Promise<{ category?: string }>
+}) {
+  const { category } = await searchParams
+  const programs = await getPrograms(category)
 
   return (
     <div className="min-h-screen flex flex-col bg-[#0a0a0a]">
@@ -28,17 +37,22 @@ export default async function Home() {
           </p>
         </div>
 
+        <CategoryFilter active={category ?? null} />
+
         {programs.length === 0 ? (
-          <p className="text-white/40">No program data available yet.</p>
+          <p className="text-white/40 mt-6">No program data available for this filter.</p>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-6">
             {programs.map((p) => (
               <ProgramCard
-                key={`${p.school}|${p.program}`}
+                key={`${p.school}|${p.program_name}`}
                 school={p.school}
-                program={p.program}
-                total={p.total}
+                programName={p.program_name}
+                programCategory={p.program_category}
+                dataTier={p.data_tier}
+                totalRecords={p.total_records}
                 accepted={p.accepted}
+                overallAvg={p.overall_avg}
               />
             ))}
           </div>
