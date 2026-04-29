@@ -26,6 +26,7 @@ class Student(Base):
     # Program
     program_raw = Column(Text, nullable=True)
     program_category = Column(String, nullable=True)  # ENGINEERING, SCIENCE, etc.
+    program_normalized = Column(String, nullable=True)  # canonical program name
 
     # Decision
     decision = Column(String, nullable=True)          # ACCEPTED, REJECTED, etc.
@@ -48,6 +49,25 @@ class Student(Base):
     comments_raw = Column(Text, nullable=True)
     ec_raw = Column(Text, nullable=True)
     circumstances_raw = Column(Text, nullable=True)
+
+
+class CudoProgram(Base):
+    __tablename__ = "cudo_programs"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    school = Column(String, nullable=False)
+    program_name = Column(String, nullable=False)
+    program_category = Column(String, nullable=False)
+    year = Column(Integer, nullable=False)
+    pct_95_plus = Column(Float, nullable=True)
+    pct_90_94 = Column(Float, nullable=True)
+    pct_85_89 = Column(Float, nullable=True)
+    pct_80_84 = Column(Float, nullable=True)
+    pct_75_79 = Column(Float, nullable=True)
+    pct_70_74 = Column(Float, nullable=True)
+    pct_below_70 = Column(Float, nullable=True)
+    overall_avg = Column(Float, nullable=True)
+    source_url = Column(String, nullable=True)
 
 
 def get_engine(db_path: str = "database/unipath.db"):
