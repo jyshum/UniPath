@@ -182,54 +182,73 @@ GRADE_BUCKETS = [
 ]
 
 
-def program_stats(school: str, program_category: str) -> dict:
-    """
-    Returns aggregated stats for a school+program combo:
-    - grade_distribution: list of {bucket, accepted, rejected, waitlisted, deferred}
-    - ec_breakdown: list of {tag, pct} among accepted students
-    - total_records, avg_admitted_grade, grade_range, data_sources
-    """
+def program_stats(school: str, program_name: str) -> dict:
+    """Returns merged stats for a school+program from both CUDO and pipeline data."""
     conn = get_connection()
-    program_category = program_category.upper()
 
-    rows = conn.execute(
-        "SELECT decision, core_avg, ec_tags, source FROM students "
-        "WHERE school_normalized = ? AND program_category = ? AND core_avg IS NOT NULL",
-        (school, program_category),
+    # --- CUDO data ---
+    cudo_rows = conn.execute(
+        "SELECT year, pct_95_plus, pct_90_94, pct_85_89, pct_80_84, "
+        "pct_75_79, pct_70_74, pct_below_70, overall_avg "
+        "FROM cudo_programs WHERE school = ? AND program_name = ? "
+        "ORDER BY year DESC",
+        (school, program_name),
     ).fetchall()
-    conn.close()
 
-    if not rows:
-        return {
-            "school": school,
-            "program": program_category,
-            "grade_distribution": [],
-            "ec_breakdown": [],
-            "total_records": 0,
-            "accepted_count": 0,
-            "avg_admitted_grade": None,
-            "grade_range": None,
-            "data_sources": {},
-        }
+    # --- Pipeline data ---
+    pipeline_rows = conn.execute(
+        "SELECT decision, core_avg, ec_tags, source FROM students "
+        "WHERE school_normalized = ? AND program_normalized = ? AND core_avg IS NOT NULL",
+        (school, program_name),
+    ).fetchall()
 
-    # Grade distribution
-    grade_dist = []
-    for label, lo, hi in GRADE_BUCKETS:
-        bucket = {"bucket": label, "accepted": 0, "rejected": 0, "waitlisted": 0, "deferred": 0}
-        for decision, grade, _, _ in rows:
-            if lo <= grade <= hi and decision:
-                key = decision.lower()
-                if key in bucket:
-                    bucket[key] += 1
-        grade_dist.append(bucket)
+    has_cudo = len(cudo_rows) > 0
+    has_pipeline = len(pipeline_rows) > 0
 
-    # EC breakdown (accepted students only)
+    if not has_cudo and not has_pipeline:
+        return {"error": "no_data"}
+
+    # Determine data tier
+    if has_cudo and has_pipeline:
+        data_tier = "both"
+    elif has_cudo:
+        data_tier = "official"
+    else:
+        data_tier = "community"
+
+    # --- Grade distribution ---
+    if has_cudo:
+        latest = cudo_rows[0]
+        _, p95, p90, p85, p80, p75, p70, pbelow, _ = latest
+        grade_dist = [
+            {"bucket": "95-100", "pct": p95, "accepted": None, "rejected": None, "waitlisted": None, "deferred": None},
+            {"bucket": "90-94", "pct": p90, "accepted": None, "rejected": None, "waitlisted": None, "deferred": None},
+            {"bucket": "85-89", "pct": p85, "accepted": None, "rejected": None, "waitlisted": None, "deferred": None},
+            {"bucket": "80-84", "pct": p80, "accepted": None, "rejected": None, "waitlisted": None, "deferred": None},
+            {"bucket": "75-79", "pct": p75, "accepted": None, "rejected": None, "waitlisted": None, "deferred": None},
+            {"bucket": "70-74", "pct": p70, "accepted": None, "rejected": None, "waitlisted": None, "deferred": None},
+            {"bucket": "< 70", "pct": pbelow, "accepted": None, "rejected": None, "waitlisted": None, "deferred": None},
+        ]
+    else:
+        grade_dist = []
+        for label, lo, hi in GRADE_BUCKETS:
+            bucket = {"bucket": label, "pct": None, "accepted": 0, "rejected": 0, "waitlisted": 0, "deferred": 0}
+            for decision, grade, _, _ in pipeline_rows:
+                if lo <= grade <= hi and decision:
+                    key = decision.lower()
+                    if key in bucket:
+                        bucket[key] += 1
+            grade_dist.append(bucket)
+
+    # --- EC breakdown (pipeline only) ---
     from collections import Counter
     ec_counter = Counter()
     accepted_count = 0
     accepted_grades = []
+    source_counter = Counter()
 
-    for decision, grade, ec_tags_str, source in rows:
+    for decision, grade, ec_tags_str, source in pipeline_rows:
+        source_counter[source] += 1
         if decision == "ACCEPTED":
             accepted_count += 1
             accepted_grades.append(grade)
@@ -247,54 +266,133 @@ def program_stats(school: str, program_category: str) -> dict:
         for tag, count in ec_counter.most_common()
     ] if accepted_count > 0 else []
 
-    # Data sources
-    from collections import Counter as _Counter
-    source_counter = _Counter(source for _, _, _, source in rows)
+    # --- Historical trends (CUDO only) ---
+    historical = []
+    if has_cudo:
+        for row in reversed(cudo_rows):
+            year, _, _, _, _, _, _, _, avg = row
+            if avg is not None:
+                historical.append({"year": year, "overall_avg": avg})
+
+    # --- Overall avg ---
+    if has_cudo:
+        overall_avg = cudo_rows[0][8]
+    elif accepted_grades:
+        overall_avg = round(sum(accepted_grades) / len(accepted_grades), 1)
+    else:
+        overall_avg = None
+
+    # --- Data sources ---
+    data_sources = dict(source_counter)
+    if has_cudo:
+        data_sources["CUDO_OFFICIAL"] = len(cudo_rows)
+
+    # --- Get program_category ---
+    pc_conn = get_connection()
+    if has_cudo:
+        pc_row = pc_conn.execute(
+            "SELECT program_category FROM cudo_programs WHERE school = ? AND program_name = ? LIMIT 1",
+            (school, program_name),
+        ).fetchone()
+    else:
+        pc_row = pc_conn.execute(
+            "SELECT program_category FROM students WHERE school_normalized = ? AND program_normalized = ? LIMIT 1",
+            (school, program_name),
+        ).fetchone()
+    pc_conn.close()
+    conn.close()
+    program_category = pc_row[0] if pc_row else "OTHER"
 
     return {
         "school": school,
-        "program": program_category,
+        "program_name": program_name,
+        "program_category": program_category,
+        "data_tier": data_tier,
         "grade_distribution": grade_dist,
         "ec_breakdown": ec_breakdown,
-        "total_records": len(rows),
-        "accepted_count": accepted_count,
+        "overall_avg": overall_avg,
+        "historical": historical,
+        "total_records": len(pipeline_rows) if has_pipeline else None,
+        "accepted_count": accepted_count if has_pipeline else None,
         "avg_admitted_grade": round(sum(accepted_grades) / len(accepted_grades), 1) if accepted_grades else None,
         "grade_range": {
             "min": round(min(accepted_grades), 1),
             "max": round(max(accepted_grades), 1),
         } if accepted_grades else None,
-        "data_sources": dict(source_counter),
+        "data_sources": data_sources,
     }
 
 
-def list_programs(min_records: int = 10) -> list[dict]:
-    """
-    Returns all school+program combos with at least min_records,
-    sorted by total descending.
-    """
+def list_programs(min_records: int = 10, category: str = None) -> list[dict]:
+    """Returns all programs from both pipeline and CUDO data, deduplicated."""
     conn = get_connection()
-    rows = conn.execute(
-        "SELECT school_normalized, program_category, COUNT(*) as cnt, "
-        "SUM(CASE WHEN decision = 'ACCEPTED' THEN 1 ELSE 0 END) as accepted "
-        "FROM students "
-        "WHERE school_normalized IS NOT NULL AND program_category IS NOT NULL "
-        "AND core_avg IS NOT NULL "
-        "GROUP BY school_normalized, program_category "
-        "HAVING cnt >= ? "
-        "ORDER BY cnt DESC",
-        (min_records,),
-    ).fetchall()
+
+    # Pipeline programs: group by school + program_normalized
+    pipeline_query = """
+        SELECT school_normalized, program_normalized, program_category,
+               COUNT(*) as cnt,
+               SUM(CASE WHEN decision = 'ACCEPTED' THEN 1 ELSE 0 END) as accepted
+        FROM students
+        WHERE school_normalized IS NOT NULL
+          AND program_normalized IS NOT NULL
+          AND core_avg IS NOT NULL
+        GROUP BY school_normalized, program_normalized
+        HAVING cnt >= ?
+        ORDER BY cnt DESC
+    """
+    pipeline_rows = conn.execute(pipeline_query, (min_records,)).fetchall()
+
+    # CUDO programs: most recent year per school+program
+    cudo_query = """
+        SELECT school, program_name, program_category, overall_avg, MAX(year) as latest_year
+        FROM cudo_programs
+        GROUP BY school, program_name
+        ORDER BY school, program_name
+    """
+    cudo_rows = conn.execute(cudo_query).fetchall()
     conn.close()
 
-    return [
-        {
+    programs = {}
+
+    for school, program_name, program_category, total, accepted in pipeline_rows:
+        key = (school, program_name)
+        programs[key] = {
             "school": school,
-            "program": program,
-            "total": total,
+            "program_name": program_name,
+            "program_category": program_category,
+            "data_tier": "community",
+            "total_records": total,
             "accepted": accepted,
+            "overall_avg": None,
         }
-        for school, program, total, accepted in rows
-    ]
+
+    for school, program_name, program_category, overall_avg, year in cudo_rows:
+        key = (school, program_name)
+        if key in programs:
+            programs[key]["data_tier"] = "both"
+            programs[key]["overall_avg"] = overall_avg
+        else:
+            programs[key] = {
+                "school": school,
+                "program_name": program_name,
+                "program_category": program_category,
+                "data_tier": "official",
+                "total_records": None,
+                "accepted": None,
+                "overall_avg": overall_avg,
+            }
+
+    result = list(programs.values())
+
+    if category:
+        result = [p for p in result if p["program_category"] == category.upper()]
+
+    result.sort(key=lambda p: (
+        0 if p["data_tier"] == "both" else 1 if p["data_tier"] == "official" else 2,
+        -(p["total_records"] or 0),
+    ))
+
+    return result
 
 
 def print_summary(summary: dict):

@@ -98,15 +98,15 @@ def get_final_probability(req: ProbabilityRequest):
 
 
 @app.get("/programs")
-def get_programs():
-    return list_programs(min_records=10)
+def get_programs(category: str = None):
+    return list_programs(min_records=10, category=category)
 
 
-@app.get("/programs/{school}/{program}")
-def get_program_stats(school: str, program: str):
-    result = program_stats(school, program.upper())
-    if result["total_records"] == 0:
-        return {"error": "no_data"}
+@app.get("/programs/{school}/{program_name}")
+def get_program_stats(school: str, program_name: str):
+    result = program_stats(school, program_name)
+    if isinstance(result, dict) and result.get("error"):
+        return result
     return result
 
 
