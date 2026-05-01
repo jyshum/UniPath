@@ -296,6 +296,7 @@ def load_student(normalized: dict, engine) -> bool:
         existing = session.query(Student).filter(
             Student.source == "REDDIT_SCRAPED",
             Student.school_normalized == student.school_normalized,
+            Student.program_raw == student.program_raw,
             Student.decision == student.decision,
             Student.core_avg == student.core_avg,
         ).first()
@@ -340,7 +341,9 @@ def run():
 
     total_fetched = 0
     total_extracted = 0
-    total_loaded = 0
+    inserted_rows = 0
+    duplicate_skipped = 0
+    load_failed = 0
 
     for subreddit in SUBREDDITS:
         print(f"\nScraping r/{subreddit}...")
@@ -381,19 +384,17 @@ def run():
                 normalized_series = pd.Series(normalized)
                 extracted = extract_row(normalized_series)
 
-                # Convert tag lists to JSON strings for database storage
-                import json
-                if isinstance(extracted.get("ec_tags"), list):
-                    extracted["ec_tags"] = json.dumps(extracted["ec_tags"])
-                if isinstance(extracted.get("circumstance_tags"), list):
-                    extracted["circumstance_tags"] = json.dumps(extracted["circumstance_tags"])
-
                 # Load
                 try:
-                    load_student(extracted, engine)
-                    total_loaded += 1
-                    print(f"    ✓ {extracted.get('school_normalized')} | {extracted.get('program_raw')} | {extracted.get('program_category')} | {extracted.get('decision')} | {extracted.get('core_avg')}")
+                    inserted = load_student(extracted, engine)
+                    if inserted:
+                        inserted_rows += 1
+                        print(f"    ✓ {extracted.get('school_normalized')} | {extracted.get('program_raw')} | {extracted.get('program_category')} | {extracted.get('decision')} | {extracted.get('core_avg')}")
+                    else:
+                        duplicate_skipped += 1
+                        print(f"    duplicate skipped | {extracted.get('school_normalized')} | {extracted.get('program_raw')} | {extracted.get('decision')} | {extracted.get('core_avg')}")
                 except Exception as e:
+                    load_failed += 1
                     print(f"    ✗ Load failed: {e}")
 
             # Mark query as complete after all posts processed
@@ -403,10 +404,11 @@ def run():
     print(f"Agent complete.")
     print(f"  Posts processed: {total_fetched}")
     print(f"  Valid extractions: {total_extracted}")
-    print(f"  Rows loaded: {total_loaded}")
+    print(f"  Rows inserted: {inserted_rows}")
+    print(f"  Duplicate rows skipped: {duplicate_skipped}")
+    print(f"  Load failures: {load_failed}")
     print(f"{'=' * 50}")
 
 
 if __name__ == "__main__":
     run()
-

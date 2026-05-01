@@ -1,6 +1,8 @@
 # tests/test_program_stats.py
 import pytest
+import sqlite3
 from core.recommend import program_stats, list_programs
+from core import recommend
 
 
 def test_program_stats_returns_expected_shape():
@@ -30,6 +32,60 @@ def test_program_stats_ec_breakdown_has_percentages():
         assert "tag" in entry
         assert "pct" in entry
         assert 0 <= entry["pct"] <= 100
+
+
+def test_program_stats_ec_breakdown_excludes_grade_only_rows_from_denominator(tmp_path, monkeypatch):
+    db_path = tmp_path / "program_stats.db"
+    conn = sqlite3.connect(db_path)
+    conn.execute(
+        """
+        CREATE TABLE students (
+            school_normalized TEXT,
+            program_normalized TEXT,
+            program_category TEXT,
+            decision TEXT,
+            core_avg REAL,
+            ec_tags TEXT,
+            source TEXT
+        )
+        """
+    )
+    conn.execute(
+        """
+        CREATE TABLE cudo_programs (
+            school TEXT,
+            program_name TEXT,
+            program_category TEXT,
+            year INTEGER,
+            pct_95_plus REAL,
+            pct_90_94 REAL,
+            pct_85_89 REAL,
+            pct_80_84 REAL,
+            pct_75_79 REAL,
+            pct_70_74 REAL,
+            pct_below_70 REAL,
+            overall_avg REAL
+        )
+        """
+    )
+    conn.executemany(
+        "INSERT INTO students VALUES (?, ?, ?, ?, ?, ?, ?)",
+        [
+            ("Test University", "Engineering", "ENGINEERING", "ACCEPTED", 95, '["LEADERSHIP"]', "REDDIT_SCRAPED"),
+            ("Test University", "Engineering", "ENGINEERING", "ACCEPTED", 94, '["NONE"]', "REDDIT_SCRAPED"),
+            ("Test University", "Engineering", "ENGINEERING", "ACCEPTED", 93, None, "REDDIT_SCRAPED"),
+            ("Test University", "Engineering", "ENGINEERING", "REJECTED", 92, '["RESEARCH"]', "REDDIT_SCRAPED"),
+        ],
+    )
+    conn.commit()
+    conn.close()
+    monkeypatch.setattr(recommend, "DB_PATH", db_path)
+
+    result = program_stats("Test University", "Engineering")
+
+    assert result["total_records"] == 4
+    assert result["accepted_count"] == 3
+    assert result["ec_breakdown"] == [{"tag": "LEADERSHIP", "count": 1, "pct": 100}]
 
 
 def test_program_stats_unknown_combo_returns_error():

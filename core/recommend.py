@@ -182,6 +182,33 @@ GRADE_BUCKETS = [
 ]
 
 
+def _decode_ec_tags(raw) -> list[str]:
+    """Decode canonical and legacy double-encoded EC tag JSON."""
+    if not raw:
+        return []
+    try:
+        tags = _json.loads(raw)
+    except (_json.JSONDecodeError, TypeError):
+        return []
+
+    if (
+        isinstance(tags, list)
+        and len(tags) == 1
+        and isinstance(tags[0], str)
+        and tags[0].strip().startswith("[")
+    ):
+        try:
+            nested = _json.loads(tags[0])
+            if isinstance(nested, list):
+                tags = nested
+        except (_json.JSONDecodeError, TypeError):
+            pass
+
+    if not isinstance(tags, list):
+        return []
+    return [str(tag).strip() for tag in tags if str(tag).strip()]
+
+
 def program_stats(school: str, program_name: str) -> dict:
     """Returns merged stats for a school+program from both CUDO and pipeline data."""
     conn = get_connection()
@@ -244,6 +271,7 @@ def program_stats(school: str, program_name: str) -> dict:
     from collections import Counter
     ec_counter = Counter()
     accepted_count = 0
+    accepted_with_real_ec_count = 0
     accepted_grades = []
     source_counter = Counter()
 
@@ -252,19 +280,19 @@ def program_stats(school: str, program_name: str) -> dict:
         if decision == "ACCEPTED":
             accepted_count += 1
             accepted_grades.append(grade)
-            if ec_tags_str:
-                try:
-                    tags = _json.loads(ec_tags_str)
-                    for tag in tags:
-                        if tag not in ("NONE", "OTHER"):
-                            ec_counter[tag] += 1
-                except (_json.JSONDecodeError, TypeError):
-                    pass
+            real_tags = [
+                tag for tag in _decode_ec_tags(ec_tags_str)
+                if tag not in ("NONE", "OTHER")
+            ]
+            if real_tags:
+                accepted_with_real_ec_count += 1
+                for tag in real_tags:
+                    ec_counter[tag] += 1
 
     ec_breakdown = [
-        {"tag": tag, "count": count, "pct": round(count / accepted_count * 100)}
+        {"tag": tag, "count": count, "pct": round(count / accepted_with_real_ec_count * 100)}
         for tag, count in ec_counter.most_common()
-    ] if accepted_count > 0 else []
+    ] if accepted_with_real_ec_count > 0 else []
 
     # --- Historical trends (CUDO only) ---
     historical = []

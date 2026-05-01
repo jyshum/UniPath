@@ -6,6 +6,7 @@ from pathlib import Path
 from sqlalchemy.orm import Session
 
 from database.models import Student, init_db, get_engine
+from pipeline.program_names import normalize_program_name
 
 BC_EXTRACTED_PATH = Path("data/cleaned/bc_extracted.csv")
 
@@ -15,22 +16,43 @@ def parse_tags(raw) -> str:
     Converts pipe-separated tag string to JSON array string.
     "SPORTS|ARTS" -> '["SPORTS", "ARTS"]'
     """
+    if isinstance(raw, list):
+        return json.dumps([str(t).strip() for t in raw if str(t).strip()])
+
     if pd.isna(raw) or str(raw).strip() == "":
         return json.dumps([])
-    tags = [t.strip() for t in str(raw).split("|") if t.strip()]
+
+    raw_str = str(raw).strip()
+    if raw_str.startswith("["):
+        try:
+            parsed = json.loads(raw_str)
+            if isinstance(parsed, list):
+                return json.dumps([str(t).strip() for t in parsed if str(t).strip()])
+        except json.JSONDecodeError:
+            pass
+
+    tags = [t.strip() for t in raw_str.split("|") if t.strip()]
     return json.dumps(tags)
 
 
 def row_to_student(row: pd.Series) -> Student:
     """Maps a DataFrame row to a Student ORM object."""
+    program_raw = row.get("program_raw") if pd.notna(row.get("program_raw")) else None
+    program_normalized = (
+        row.get("program_normalized")
+        if pd.notna(row.get("program_normalized"))
+        else normalize_program_name(program_raw)
+    )
+
     return Student(
         source=row.get("source"),
         pulled_at=str(row.get("pulled_at")) if pd.notna(row.get("pulled_at")) else None,
         school_raw=row.get("school_raw") if pd.notna(row.get("school_raw")) else None,
         school_normalized=row.get("school_normalized") if pd.notna(row.get("school_normalized")) else None,
         multi_school_flag=bool(row.get("multi_school_flag")),
-        program_raw=row.get("program_raw") if pd.notna(row.get("program_raw")) else None,
+        program_raw=program_raw,
         program_category=row.get("program_category") if pd.notna(row.get("program_category")) else None,
+        program_normalized=program_normalized,
         decision=row.get("decision") if pd.notna(row.get("decision")) else None,
         grade_11_avg=float(row["grade_11_avg"]) if pd.notna(row.get("grade_11_avg")) else None,
         grade_12_avg=float(row["grade_12_avg"]) if pd.notna(row.get("grade_12_avg")) else None,
