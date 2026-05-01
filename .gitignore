@@ -10,3 +10,4 @@ credentials.json
 reccommend.py
 app.py
 data/reddit_agent_progress.txt
+.worktrees/
