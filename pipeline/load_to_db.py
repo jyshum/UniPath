@@ -38,17 +38,18 @@ def parse_tags(raw) -> str:
 def row_to_student(row: pd.Series) -> Student:
     """Maps a DataFrame row to a Student ORM object."""
     program_raw = row.get("program_raw") if pd.notna(row.get("program_raw")) else None
+    school_normalized = row.get("school_normalized") if pd.notna(row.get("school_normalized")) else None
     program_normalized = (
         row.get("program_normalized")
         if pd.notna(row.get("program_normalized"))
-        else normalize_program_name(program_raw)
+        else normalize_program_name(program_raw, school=school_normalized)
     )
 
     return Student(
         source=row.get("source"),
         pulled_at=str(row.get("pulled_at")) if pd.notna(row.get("pulled_at")) else None,
         school_raw=row.get("school_raw") if pd.notna(row.get("school_raw")) else None,
-        school_normalized=row.get("school_normalized") if pd.notna(row.get("school_normalized")) else None,
+        school_normalized=school_normalized,
         multi_school_flag=bool(row.get("multi_school_flag")),
         program_raw=program_raw,
         program_category=row.get("program_category") if pd.notna(row.get("program_category")) else None,

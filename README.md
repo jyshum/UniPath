@@ -16,6 +16,7 @@ Students browse real admitted student data by school and program — grade distr
 - **Program page:** detailed grade distribution chart (7 buckets), EC tag breakdown, historical trends by year, and a "Where Do You Stand?" acceptance likelihood panel
 - **Anonymous submission form:** students can submit their own outcome to grow the dataset
 - **Acceptance probability engine:** personalized likelihood using published stats + grade-adjusted normal distribution; scored via Ollama llama3.2 for essays/AIFs/ECs
+- **Canonical program taxonomy:** `canadian_programs.json` drives program aliases, categories, admission metadata, Reddit prompt guidance, and backfills
 - Covers 7 Canadian universities across 18+ school/program combinations
 
 ---

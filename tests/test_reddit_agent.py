@@ -71,3 +71,11 @@ def test_load_student_reports_exact_duplicate_as_skipped(tmp_path):
 
     with Session(engine) as session:
         assert session.query(Student).count() == 1
+
+
+def test_reddit_prompt_uses_taxonomy_guidance():
+    from pipeline.reddit_agent import EXTRACTION_PROMPT
+
+    assert "{program_guidance}" not in EXTRACTION_PROMPT
+    assert "SYDE" in EXTRACTION_PROMPT or "syde" in EXTRACTION_PROMPT
+    assert "Do NOT infer program from the search query" in EXTRACTION_PROMPT

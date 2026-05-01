@@ -12,88 +12,29 @@ from eval.schemas import AdmissionExtraction
 from pipeline.normalize import normalize_row
 from pipeline.normalize import normalize_school
 from pipeline.extract_fields import extract_row
+from pipeline.program_names import program_aliases_for_prompt, program_search_terms
 
 
 HEADERS = {"User-Agent": "unipath-ai/1.0 (research project)"}
 
 SUBREDDITS = ["OntarioGrade12s", "BCGrade12s", "AlbertaGrade12s"]
 
-SEARCH_QUERIES = [
-
-    # Engineering
+BASE_SEARCH_QUERIES = [
     "accepted engineering",
     "rejected engineering",
     "engineering admission",
-    "applied science accepted",
-    "got into engineering",
-    "engineering offer",
-    "ECE accepted",
-    "software engineering accepted",
-    "mechanical engineering accepted",
-    "chemical engineering accepted",
-
-    # Computer Science
     "accepted computer science",
     "rejected computer science",
-    "CS accepted",
-    "CompSci accepted",
-    "got into CS",
-    "computer science offer",
-    "CS rejection",
-    "math CS accepted",
-
-    # Business / Commerce
     "accepted commerce",
-    "Sauder accepted",
     "Ivey accepted",
-    "Schulich accepted",
-    "Beedie accepted",
-    "Rotman accepted",
-    "HBA accepted",
-    "BBA accepted",
-    "got into business",
-    "commerce rejection",
     "Ivey AEO",
-
-    # Science
     "accepted science",
-    "life sciences accepted",
     "health sciences accepted",
-    "rejected science",
-    "got into science",
-    "biomed accepted",
-    "biochemistry accepted",
-    "kinesiology accepted",
-
-    # Health
-    "nursing accepted",
-    "pharmacy accepted",
     "health sci accepted",
-    "McMaster health sci",
-    "rejected health sciences",
-    "physiotherapy accepted",
-
-    # Arts / Humanities
     "accepted arts",
-    "social sciences accepted",
-    "got into arts",
-    "rejected arts",
-    "psychology accepted",
-
-    # School-specific program combos
-    "UBC science accepted",
-    "UBC engineering accepted",
-    "UBC Sauder accepted",
-    "Waterloo CS accepted",
-    "Waterloo math accepted",
-    "Waterloo engineering accepted",
-    "McMaster life sci accepted",
-    "McMaster health sci accepted",
-    "UofT engineering accepted",
-    "UofT life sci accepted",
-    "Queens engineering accepted",
-    "Western Ivey accepted",
 ]
+
+SEARCH_QUERIES = sorted(set(BASE_SEARCH_QUERIES + program_search_terms()))
 
 VALID_DECISIONS = {"Accepted", "Rejected", "Waitlisted", "Deferred"}
 
@@ -141,12 +82,16 @@ def fetch_posts(subreddit: str, query: str, limit: int = 100) -> list[dict]:
 
 # EXTRACTION AGENCY
 
-EXTRACTION_PROMPT = """You are extracting Canadian university admissions data from a Reddit post.
+PROGRAM_GUIDANCE = program_aliases_for_prompt(max_items=80)
+
+EXTRACTION_PROMPT = f"""You are extracting Canadian university admissions data from a Reddit post.
 
 Extract the following fields if clearly present:
 - school: university name as a string (e.g. "UBC", "University of Toronto") or null.
   If a faculty name implies a school (e.g. "Ivey" → "Western University", "Sauder" → "UBC"), extract both.
 - program: program or major name as a string or null.
+  High-signal program aliases:
+{PROGRAM_GUIDANCE}
   You may infer program ONLY from faculty or program names explicitly present in the post:
   "Sauder" or "UBC Sauder" → "Commerce",
   "Ivey" or "Ivey AEO" → "Business Administration",
@@ -199,14 +144,14 @@ Rules:
 - Do NOT extract data from posts asking for advice, only from posts reporting actual outcomes
 
 Post text:
-{post_text}"""
+{{post_text}}"""
 
 def extract_admission_data(post_text: str) -> dict | None:
     """
     Uses a local Ollama model with structured output to extract admissions data.
     Returns a dict if relevant data found, None otherwise.
     """
-    prompt = EXTRACTION_PROMPT.format(post_text=post_text[:2000])
+    prompt = EXTRACTION_PROMPT.replace("{post_text}", post_text[:2000])
 
     try:
         response = ollama.chat(

@@ -95,3 +95,12 @@ def test_parse_program_category_set():
     for r in results:
         assert r["program_category"], f"Empty category for {r['program_name']}"
         assert isinstance(r["program_category"], str)
+
+
+def test_cudo_business_name_uses_taxonomy():
+    from pipeline.program_names import get_program_category, normalize_program_name
+
+    canonical = normalize_program_name("Commerce/Mgmt/Business Admin")
+
+    assert canonical == "Commerce"
+    assert get_program_category(canonical) == "BUSINESS"

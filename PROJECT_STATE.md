@@ -14,6 +14,12 @@ UniPath AI is currently a Canadian university admissions outcomes tool with a Py
 - `program_normalized` has been backfilled across existing student rows so the program browse/detail pages can see community data.
 - CUDO Windsor business rows were normalized from `Commerce/Mgmt/Business Admin` to `Commerce` / `BUSINESS`.
 
+## Canonical Program Taxonomy
+
+- `canadian_programs.json` is now the source of truth for program names, aliases, categories, and admission metadata.
+- Existing student rows were backfilled through the taxonomy with school-aware normalization.
+- Reddit extraction prompt guidance and search queries now use taxonomy helpers.
+
 ## Frontend State
 
 - Browse page now returns 35 programs across category filters.

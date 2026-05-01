@@ -491,8 +491,13 @@
     {
       "canonical_name": "Biomedical Sciences",
       "category": "SCIENCE",
-      "schools": ["University of Waterloo", "University of Ottawa"],
-      "aliases": ["biomed sci", "biomedical"]
+      "schools": ["University of Waterloo", "University of Ottawa", "University of Calgary"],
+      "aliases": ["biomed sci", "biomedical", "biomedical science"],
+      "admission_type": {
+        "University of Waterloo": "direct",
+        "University of Ottawa": "direct",
+        "University of Calgary": "direct"
+      }
     },
     {
       "canonical_name": "Medical Sciences",
@@ -583,7 +588,7 @@
       "canonical_name": "Commerce",
       "category": "BUSINESS",
       "schools": ["UBC Vancouver", "Queen's University", "Dalhousie University", "University of Ottawa", "University of Calgary"],
-      "aliases": ["commerce", "comm", "bcom", "b.comm", "business"],
+      "aliases": ["commerce", "comm", "bcom", "b.comm", "business", "Sauder", "sauder"],
       "notes": "UBC = Sauder School of Business. Queen's = Smith School of Business. Often the most discussed business program on Reddit for each school."
     },
     {
@@ -688,12 +693,6 @@
       "schools": ["University of Toronto", "McMaster University", "Queen's University", "Western University"],
       "aliases": ["life sci", "lifesci", "premed", "pre-med"],
       "notes": "Not a distinct program from Science Life Sciences in some schools, but on Reddit this is the pre-med track discussion context."
-    },
-    {
-      "canonical_name": "Biomedical Sciences",
-      "category": "HEALTH",
-      "schools": ["University of Waterloo", "University of Ottawa", "University of Calgary"],
-      "aliases": ["biomed sci", "biomedical science"]
     },
     {
       "canonical_name": "Optometry",

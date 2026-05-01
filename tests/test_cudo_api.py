@@ -31,6 +31,14 @@ def test_get_programs_category_filter():
         assert item["program_category"] == "ENGINEERING"
 
 
+def test_programs_business_filter_has_results():
+    response = client.get("/programs?category=BUSINESS")
+    assert response.status_code == 200
+    data = response.json()
+    assert len(data) > 0
+    assert all(item["program_category"] == "BUSINESS" for item in data)
+
+
 def test_get_program_detail_returns_stats():
     response = client.get("/programs")
     data = response.json()
