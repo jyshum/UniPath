@@ -2,18 +2,21 @@
 
 Canadian university admissions outcomes tool for high school students.
 
-Students enter their grades, target school, and program to get a **calibrated acceptance likelihood** anchored to published university acceptance rates — plus a panel showing grade data from real admitted students in our dataset.
+Students browse real admitted student data by school and program — grade distributions, EC breakdowns, and historical acceptance trends — and optionally get a calibrated acceptance likelihood based on their own grades.
 
 **Core differentiator:** real student submission data, not synthetic or generic LLM advice.
+
+**Live at:** https://uni-path-nine.vercel.app | Private repo: https://github.com/jyshum/UniPath
 
 ---
 
 ## What It Does
 
-- Calculates a personalized acceptance probability using published admission statistics and a grade-adjusted normal distribution model
-- Scores extracurriculars and supplemental materials (essays, AIFs) via a local LLM (Ollama llama3.2)
-- Surfaces a similar students panel: grade ranges and averages from real accepted applicants in the database
-- Covers 7 Canadian universities across 18 school/program combinations
+- **Browse page:** grid of programs with filters by school category; each card shows acceptance rate and grade range
+- **Program page:** detailed grade distribution chart (7 buckets), EC tag breakdown, historical trends by year, and a "Where Do You Stand?" acceptance likelihood panel
+- **Anonymous submission form:** students can submit their own outcome to grow the dataset
+- **Acceptance probability engine:** personalized likelihood using published stats + grade-adjusted normal distribution; scored via Ollama llama3.2 for essays/AIFs/ECs
+- Covers 7 Canadian universities across 18+ school/program combinations
 
 ---
 
@@ -23,9 +26,9 @@ Students enter their grades, target school, and program to get a **calibrated ac
 |---|---|
 | Data pipeline | Python 3.13, pandas, SQLAlchemy, SQLite |
 | Probability engine | scipy (normal distribution), Ollama llama3.2 |
-| Data sources | Google Sheets (BC 2025/2026), Reddit JSON API |
+| Data sources | Google Sheets (BC 2025/2026), Reddit JSON API, CUDO (HTML scraper) |
 | Frontend | Next.js + TypeScript + Tailwind CSS |
-| Python–Node bridge | stdin/stdout JSON subprocess |
+| Python–Node bridge | FastAPI sidecar (Railway/Render) |
 
 ---
 
@@ -34,36 +37,46 @@ Students enter their grades, target school, and program to get a **calibrated ac
 ```
 Google Sheets → fetch_sheets.py → normalize.py → extract_fields.py → unipath.db
 Reddit JSON API → reddit_agent.py → unipath.db
+CUDO HTML → cudo_scraper.py → merged at API layer (not stored in DB)
 
-unipath.db → core/calibrate.py  (probability calculation)
-          → core/recommend.py   (similar students panel)
-
-Next.js form → /api/final-probability → python_bridge/final_probability.py
-                                      → calibrate + recommend → JSON response → UI
+unipath.db → /api/program_stats  (grade distribution, EC breakdown)
+           → /api/final-probability → calibrate.py + recommend.py → JSON response → UI
 ```
-
----
-
-## How Probability Is Calculated
-
-```
-base_probability × EC_multiplier × supp_multiplier_1 × ... = raw → clamped 3%–92%
-```
-
-**Mode A (grade-adjusted):** uses a z-score against published admitted grade stats (mean, std) to adjust above/below the school's base acceptance rate.
-
-**Mode B (base rate only):** fires when grade data is unavailable or the database shows an inverted distribution (selection bias safety valve).
-
-Supplemental multipliers cover essays, AIFs, and activity lists — scored via Ollama when text is provided.
 
 ---
 
 ## Database
 
 - Path: `database/unipath.db`
-- 814 rows — BC 2025 (218), BC 2026 (181), Reddit scraped (415)
-- Decision split: 666 ACCEPTED, 68 REJECTED, 65 WAITLISTED, 28 DEFERRED
-- Reddit data preserved across pipeline re-runs; BC sources are cleared and reloaded
+- **949 rows total** — Reddit (508), BC 2025 (218), BC (216), User-submitted (7)
+- Reddit rows now include grade-only records for grade analytics; EC analytics only use rows with real EC tags
+
+### The Data Problem
+
+Most rows are skewed toward accepted students (selection bias — people post wins). Reddit adds useful grade/program/decision records, but many rows do not contain extracurricular evidence, so EC breakdowns intentionally exclude grade-only Reddit rows from their percentage denominator. Some programs still have few community records, which makes grade distributions noisy for those programs.
+
+**Mitigation:** CUDO integration supplements with aggregated institutional data (grade ranges, acceptance rates) for programs where individual row counts are too low.
+
+---
+
+## What's Been Built
+
+### v1 — Probability Engine
+- Data pipeline: BC Google Sheets fetch → normalize → extract fields → SQLite
+- Reddit scraper agent (Ollama llama3.2) for additional data points
+- Acceptance probability model (Mode A: grade-adjusted z-score; Mode B: base rate fallback)
+- EC/essay/AIF scoring via Ollama multipliers
+
+### v2 — Program Intelligence Platform (current)
+- Replaced odds-calculator homepage with a **program browse grid** + category filter bar
+- Built **Program Intelligence page** per program: grade distribution (7 buckets), EC tag breakdown, historical trends collapsible
+- Added **"Where Do You Stand?"** collapsible section with personalized probability
+- Added **anonymous submission form** (inline + standalone `/submit`) to grow dataset
+- Integrated **CUDO scraper** (University of Windsor + others) — merges with pipeline data at the API layer
+- Added `program_normalized` column + backfill for consistent program name matching
+- Built **LLM extraction eval framework** (ablation: llama freeform vs structured output vs qwen3)
+- Expanded grade buckets from 5 to 7 for better CUDO alignment
+- Cleaned up double-encoded EC/circumstance tags on Reddit rows
 
 ---
 
@@ -115,20 +128,10 @@ npm install
 npm run dev
 ```
 
-The app runs at `http://localhost:3000`.
+App runs at `http://localhost:3000`.
 
 ---
 
-## Project Status
+## Deployment
 
-Functionally complete for v1. See [PROJECT_STATE.md](PROJECT_STATE.md) for full architecture details, known issues, and next steps.
-
-**Live at:** https://uni-path-nine.vercel.app
-
-The Python bridge requires a FastAPI sidecar (Railway/Render) for full production deployment — subprocess spawning does not work in Vercel serverless environments.
-
----
-
-## Repo
-
-Private: https://github.com/jyshum/UniPath
+Frontend deploys to Vercel. The Python bridge (probability engine) requires a FastAPI sidecar on Railway or Render — Vercel serverless cannot spawn subprocesses.
