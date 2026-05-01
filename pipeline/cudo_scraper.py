@@ -18,6 +18,8 @@ UNIVERSITY_CONFIGS = {
         (2022, "https://www.uwindsor.ca/institutional-analysis/370/b-admission-2022"),
         (2021, "https://www.uwindsor.ca/common-university-data-ontario/395/b-admission-2021"),
         (2020, "https://www.uwindsor.ca/common-university-data-ontario/385/b-admission-2020"),
+        (2019, "https://www.uwindsor.ca/common-university-data-ontario/372/b-admission-2019"),
+        (2018, "https://www.uwindsor.ca/common-university-data-ontario/361/b-admission-2018"),
     ],
 }
 

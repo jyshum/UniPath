@@ -49,6 +49,17 @@ def test_get_program_detail_returns_stats():
         assert "program_category" in d
 
 
+def test_get_program_detail_accepts_program_names_with_slashes():
+    response = client.get(
+        "/programs/University%20of%20Windsor/"
+        "Liberal%20Arts%20%26%20Sciences%2FGeneral%20Studies%2FHumanities"
+    )
+    assert response.status_code == 200
+    data = response.json()
+    assert data.get("program_name") == "Liberal Arts & Sciences/General Studies/Humanities"
+    assert "grade_distribution" in data
+
+
 def test_get_program_detail_grade_buckets_have_pct():
     response = client.get("/programs")
     data = response.json()

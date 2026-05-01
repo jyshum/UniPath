@@ -26,11 +26,11 @@ async function getStats(school: string, programName: string): Promise<ProgramSta
 export default async function ProgramPage({
   params,
 }: {
-  params: Promise<{ school: string; program: string }>
+  params: Promise<{ school: string; program: string[] }>
 }) {
   const { school: rawSchool, program: rawProgram } = await params
   const school = decodeURIComponent(rawSchool)
-  const programName = decodeURIComponent(rawProgram)
+  const programName = rawProgram.map((segment) => decodeURIComponent(segment)).join('/')
   const stats = await getStats(school, programName)
 
   if (!stats) {
@@ -96,7 +96,7 @@ export default async function ProgramPage({
           {stats.grade_range && (
             <div className="p-4 rounded-xl border border-white/10 bg-white/[0.03]">
               <p className="text-2xl font-medium text-[#f5f5f0]">
-                {stats.grade_range.min}–{stats.grade_range.max}%
+                {stats.grade_range.min}-{stats.grade_range.max}%
               </p>
               <p className="text-xs text-white/40 mt-1">Admitted range</p>
             </div>
@@ -144,7 +144,7 @@ export default async function ProgramPage({
           {sourceLabel}
           {stats.total_records != null && stats.total_records < 20 && stats.data_tier !== 'official' && (
             <span className="block mt-1 text-yellow-500/50">
-              Limited community data — take insights with a grain of salt
+              Limited community data - take insights with a grain of salt
             </span>
           )}
         </div>

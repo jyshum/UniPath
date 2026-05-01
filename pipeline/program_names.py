@@ -6,6 +6,7 @@ _PROGRAM_NAME_MAP = {
     # CUDO names → canonical
     "computer & information science": "Computer Science",
     "commerce/management/business admin": "Commerce",
+    "commerce/mgmt/business admin": "Commerce",
     "biological & biomedical sciences": "Biological Sciences",
     "health profession & related programs": "Health Sciences",
     "kinesiology/recreation/physical education": "Kinesiology",

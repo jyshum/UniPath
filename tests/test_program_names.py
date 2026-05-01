@@ -5,6 +5,7 @@ def test_normalize_cudo_name():
     """CUDO-style names map to canonical names."""
     assert normalize_program_name("Computer & Information Science") == "Computer Science"
     assert normalize_program_name("Commerce/Management/Business Admin") == "Commerce"
+    assert normalize_program_name("Commerce/Mgmt/Business Admin") == "Commerce"
     assert normalize_program_name("Biological & Biomedical Sciences") == "Biological Sciences"
 
 

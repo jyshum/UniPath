@@ -102,7 +102,7 @@ def get_programs(category: str = None):
     return list_programs(min_records=10, category=category)
 
 
-@app.get("/programs/{school}/{program_name}")
+@app.get("/programs/{school}/{program_name:path}")
 def get_program_stats(school: str, program_name: str):
     result = program_stats(school, program_name)
     if isinstance(result, dict) and result.get("error"):
