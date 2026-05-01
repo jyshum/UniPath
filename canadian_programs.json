@@ -1,0 +1,904 @@
+{
+  "metadata": {
+    "version": "1.0",
+    "date_compiled": "2026-04-30",
+    "notes": "Undergraduate programs at 11 Canadian universities. Tier 1 = full detail, Tier 2 = common programs only. Excludes co-op designations. Admission types: 'faculty' = admitted to broad faculty first, pick specialization later; 'direct' = admitted directly to specific program.",
+    "schools": {
+      "tier_1": ["UBC Vancouver", "University of Waterloo", "University of Toronto", "Western University", "Queen's University", "McMaster University", "Simon Fraser University"],
+      "tier_2": ["University of Alberta", "University of Calgary", "University of Ottawa", "Dalhousie University"]
+    },
+    "admission_notes": {
+      "UBC Vancouver": {
+        "engineering": "faculty",
+        "science": "faculty",
+        "arts": "faculty",
+        "commerce": "direct",
+        "note": "Engineering and Science admit to faculty first year; students pick specialization after Year 1. Sauder Commerce is direct admission."
+      },
+      "University of Toronto": {
+        "engineering": "mixed",
+        "note": "TrackOne (undeclared) is faculty-first. Core 8 programs (Chemical, Civil, Computer, Electrical, EngSci, Industrial, Materials, Mechanical, Mineral) are direct-entry but students can switch after first year. Arts & Science admits to faculty, picks POSt after Year 1."
+      },
+      "University of Waterloo": {
+        "all": "direct",
+        "note": "All programs are direct admission. Students apply to a specific program."
+      },
+      "Western University": {
+        "engineering": "direct",
+        "science": "faculty",
+        "note": "Engineering admits to specific discipline. Science admits broadly, picks module after Year 1."
+      },
+      "Queen's University": {
+        "engineering": "faculty",
+        "note": "Engineering admits to general first year; students select discipline after Year 1. Commerce and Arts/Science are direct."
+      },
+      "McMaster University": {
+        "engineering": "faculty",
+        "note": "Engineering I is common first year; students rank programs and are placed by GPA. Health Sciences is direct."
+      },
+      "Simon Fraser University": {
+        "all": "faculty",
+        "note": "Students generally admitted to a faculty and declare major later. Some programs like Computing Science have direct entry."
+      }
+    }
+  },
+  "programs": [
+    {
+      "canonical_name": "Chemical Engineering",
+      "category": "ENGINEERING",
+      "schools": ["UBC Vancouver", "University of Waterloo", "University of Toronto", "Western University", "Queen's University", "McMaster University", "University of Alberta", "University of Calgary", "University of Ottawa", "Dalhousie University"],
+      "aliases": ["chem eng", "chemeng", "ChemE", "chemical"],
+      "admission_type": {
+        "UBC Vancouver": "faculty",
+        "University of Waterloo": "direct",
+        "University of Toronto": "direct",
+        "Western University": "direct",
+        "Queen's University": "faculty",
+        "McMaster University": "faculty",
+        "University of Alberta": "direct",
+        "University of Calgary": "direct",
+        "University of Ottawa": "direct",
+        "Dalhousie University": "direct"
+      }
+    },
+    {
+      "canonical_name": "Chemical and Biological Engineering",
+      "category": "ENGINEERING",
+      "schools": ["UBC Vancouver"],
+      "aliases": ["chbe", "chem bio eng", "chemical bio eng"],
+      "admission_type": { "UBC Vancouver": "faculty" }
+    },
+    {
+      "canonical_name": "Civil Engineering",
+      "category": "ENGINEERING",
+      "schools": ["UBC Vancouver", "University of Waterloo", "University of Toronto", "Western University", "Queen's University", "McMaster University", "University of Alberta", "University of Calgary", "University of Ottawa", "Dalhousie University"],
+      "aliases": ["civil", "civ eng", "civE", "CivE"],
+      "admission_type": {
+        "UBC Vancouver": "faculty",
+        "University of Waterloo": "direct",
+        "University of Toronto": "direct",
+        "Western University": "direct",
+        "Queen's University": "faculty",
+        "McMaster University": "faculty",
+        "University of Alberta": "direct",
+        "University of Calgary": "direct",
+        "University of Ottawa": "direct",
+        "Dalhousie University": "direct"
+      }
+    },
+    {
+      "canonical_name": "Computer Engineering",
+      "category": "ENGINEERING",
+      "schools": ["UBC Vancouver", "University of Waterloo", "University of Toronto", "Western University", "Queen's University", "McMaster University", "University of Alberta", "University of Calgary", "University of Ottawa", "Dalhousie University"],
+      "aliases": ["comp eng", "cpen", "ce", "CompE", "ECE", "computer eng"],
+      "admission_type": {
+        "UBC Vancouver": "faculty",
+        "University of Waterloo": "direct",
+        "University of Toronto": "direct",
+        "Western University": "direct",
+        "Queen's University": "faculty",
+        "McMaster University": "faculty",
+        "University of Alberta": "direct",
+        "University of Calgary": "direct",
+        "University of Ottawa": "direct",
+        "Dalhousie University": "direct"
+      }
+    },
+    {
+      "canonical_name": "Electrical Engineering",
+      "category": "ENGINEERING",
+      "schools": ["UBC Vancouver", "University of Waterloo", "University of Toronto", "Western University", "Queen's University", "McMaster University", "Simon Fraser University", "University of Alberta", "University of Calgary", "University of Ottawa", "Dalhousie University"],
+      "aliases": ["elec eng", "EE", "electrical", "elec"],
+      "admission_type": {
+        "UBC Vancouver": "faculty",
+        "University of Waterloo": "direct",
+        "University of Toronto": "direct",
+        "Western University": "direct",
+        "Queen's University": "faculty",
+        "McMaster University": "faculty",
+        "Simon Fraser University": "direct",
+        "University of Alberta": "direct",
+        "University of Calgary": "direct",
+        "University of Ottawa": "direct",
+        "Dalhousie University": "direct"
+      }
+    },
+    {
+      "canonical_name": "Mechanical Engineering",
+      "category": "ENGINEERING",
+      "schools": ["UBC Vancouver", "University of Waterloo", "University of Toronto", "Western University", "Queen's University", "McMaster University", "University of Alberta", "University of Calgary", "University of Ottawa", "Dalhousie University"],
+      "aliases": ["mech eng", "MechE", "ME", "mechanical", "mech"],
+      "admission_type": {
+        "UBC Vancouver": "faculty",
+        "University of Waterloo": "direct",
+        "University of Toronto": "direct",
+        "Western University": "direct",
+        "Queen's University": "faculty",
+        "McMaster University": "faculty",
+        "University of Alberta": "direct",
+        "University of Calgary": "direct",
+        "University of Ottawa": "direct",
+        "Dalhousie University": "direct"
+      }
+    },
+    {
+      "canonical_name": "Mechatronics Engineering",
+      "category": "ENGINEERING",
+      "schools": ["University of Waterloo", "McMaster University", "Simon Fraser University"],
+      "aliases": ["mechatronics", "tron", "mte"],
+      "admission_type": {
+        "University of Waterloo": "direct",
+        "McMaster University": "faculty",
+        "Simon Fraser University": "direct"
+      }
+    },
+    {
+      "canonical_name": "Biomedical Engineering",
+      "category": "ENGINEERING",
+      "schools": ["UBC Vancouver", "University of Waterloo", "Western University", "McMaster University", "Simon Fraser University", "University of Alberta", "University of Calgary"],
+      "aliases": ["biomed eng", "BME", "biomedical", "biomed"],
+      "admission_type": {
+        "UBC Vancouver": "faculty",
+        "University of Waterloo": "direct",
+        "Western University": "direct",
+        "McMaster University": "faculty",
+        "Simon Fraser University": "direct",
+        "University of Alberta": "direct",
+        "University of Calgary": "direct"
+      }
+    },
+    {
+      "canonical_name": "Software Engineering",
+      "category": "ENGINEERING",
+      "schools": ["University of Waterloo", "Western University", "McMaster University", "University of Ottawa", "University of Calgary", "University of Alberta"],
+      "aliases": ["swe", "soft eng", "SE", "software", "sofware eng"],
+      "admission_type": {
+        "University of Waterloo": "direct",
+        "Western University": "direct",
+        "McMaster University": "faculty",
+        "University of Ottawa": "direct",
+        "University of Calgary": "direct",
+        "University of Alberta": "direct"
+      }
+    },
+    {
+      "canonical_name": "Systems Design Engineering",
+      "category": "ENGINEERING",
+      "schools": ["University of Waterloo"],
+      "aliases": ["syde", "systems design", "systems eng", "sydes"],
+      "admission_type": { "University of Waterloo": "direct" }
+    },
+    {
+      "canonical_name": "Management Engineering",
+      "category": "ENGINEERING",
+      "schools": ["University of Waterloo"],
+      "aliases": ["msci", "management eng", "mgmt eng"],
+      "admission_type": { "University of Waterloo": "direct" }
+    },
+    {
+      "canonical_name": "Architectural Engineering",
+      "category": "ENGINEERING",
+      "schools": ["University of Waterloo"],
+      "aliases": ["arch eng", "architectural eng"],
+      "admission_type": { "University of Waterloo": "direct" }
+    },
+    {
+      "canonical_name": "Environmental Engineering",
+      "category": "ENGINEERING",
+      "schools": ["UBC Vancouver", "University of Waterloo", "Queen's University", "University of Ottawa", "Dalhousie University"],
+      "aliases": ["enviro eng", "env eng", "environmental"],
+      "admission_type": {
+        "UBC Vancouver": "faculty",
+        "University of Waterloo": "direct",
+        "Queen's University": "faculty",
+        "University of Ottawa": "direct",
+        "Dalhousie University": "direct"
+      }
+    },
+    {
+      "canonical_name": "Engineering Physics",
+      "category": "ENGINEERING",
+      "schools": ["UBC Vancouver", "Queen's University", "McMaster University", "University of Alberta"],
+      "aliases": ["eng phys", "enph", "engineering physics", "phys eng"],
+      "admission_type": {
+        "UBC Vancouver": "faculty",
+        "Queen's University": "faculty",
+        "McMaster University": "faculty",
+        "University of Alberta": "direct"
+      }
+    },
+    {
+      "canonical_name": "Engineering Science",
+      "category": "ENGINEERING",
+      "schools": ["University of Toronto", "Simon Fraser University"],
+      "aliases": ["engsci", "eng sci", "esc"],
+      "admission_type": {
+        "University of Toronto": "direct",
+        "Simon Fraser University": "direct"
+      },
+      "notes": "UofT EngSci has 8 majors in upper years: Aerospace, Biomedical Systems, Electrical & Computer, Energy Systems, Machine Intelligence, Math/Stats/Finance, Engineering Physics, Robotics"
+    },
+    {
+      "canonical_name": "Industrial Engineering",
+      "category": "ENGINEERING",
+      "schools": ["University of Toronto", "Dalhousie University"],
+      "aliases": ["indie", "industrial", "IND", "industrial eng"],
+      "admission_type": {
+        "University of Toronto": "direct",
+        "Dalhousie University": "direct"
+      }
+    },
+    {
+      "canonical_name": "Materials Engineering",
+      "category": "ENGINEERING",
+      "schools": ["UBC Vancouver", "University of Toronto"],
+      "aliases": ["mat eng", "materials", "MSE", "materials science eng"],
+      "admission_type": {
+        "UBC Vancouver": "faculty",
+        "University of Toronto": "direct"
+      }
+    },
+    {
+      "canonical_name": "Mining Engineering",
+      "category": "ENGINEERING",
+      "schools": ["UBC Vancouver", "University of Toronto", "Queen's University", "University of Alberta"],
+      "aliases": ["mining", "mine eng", "mineral eng"],
+      "admission_type": {
+        "UBC Vancouver": "faculty",
+        "University of Toronto": "direct",
+        "Queen's University": "faculty",
+        "University of Alberta": "direct"
+      }
+    },
+    {
+      "canonical_name": "Geological Engineering",
+      "category": "ENGINEERING",
+      "schools": ["UBC Vancouver", "University of Waterloo", "Queen's University"],
+      "aliases": ["geo eng", "geological", "geotech"],
+      "admission_type": {
+        "UBC Vancouver": "faculty",
+        "University of Waterloo": "direct",
+        "Queen's University": "faculty"
+      }
+    },
+    {
+      "canonical_name": "Integrated Engineering",
+      "category": "ENGINEERING",
+      "schools": ["UBC Vancouver"],
+      "aliases": ["igen", "integrated eng"],
+      "admission_type": { "UBC Vancouver": "faculty" }
+    },
+    {
+      "canonical_name": "Manufacturing Engineering",
+      "category": "ENGINEERING",
+      "schools": ["UBC Vancouver"],
+      "aliases": ["mfg eng", "manufacturing"],
+      "admission_type": { "UBC Vancouver": "faculty" }
+    },
+    {
+      "canonical_name": "Nanotechnology Engineering",
+      "category": "ENGINEERING",
+      "schools": ["University of Waterloo"],
+      "aliases": ["nano", "nanotech", "NE"],
+      "admission_type": { "University of Waterloo": "direct" }
+    },
+    {
+      "canonical_name": "TrackOne (Undeclared Engineering)",
+      "category": "ENGINEERING",
+      "schools": ["University of Toronto"],
+      "aliases": ["trackone", "track one", "undeclared eng", "T1", "track 1"],
+      "admission_type": { "University of Toronto": "faculty" },
+      "notes": "Faculty-first entry. Students choose from Core 8 programs after first year."
+    },
+    {
+      "canonical_name": "Petroleum Engineering",
+      "category": "ENGINEERING",
+      "schools": ["University of Alberta", "University of Calgary"],
+      "aliases": ["petro eng", "petroleum", "pet eng", "oil and gas eng"],
+      "admission_type": {
+        "University of Alberta": "direct",
+        "University of Calgary": "direct"
+      }
+    },
+    {
+      "canonical_name": "Oil and Gas Engineering",
+      "category": "ENGINEERING",
+      "schools": ["University of Calgary"],
+      "aliases": ["oil gas", "O&G eng"],
+      "admission_type": { "University of Calgary": "direct" }
+    },
+    {
+      "canonical_name": "Geomatics Engineering",
+      "category": "ENGINEERING",
+      "schools": ["University of Calgary"],
+      "aliases": ["geomatics", "surveying eng"],
+      "admission_type": { "University of Calgary": "direct" }
+    },
+    {
+      "canonical_name": "Engineering Chemistry",
+      "category": "ENGINEERING",
+      "schools": ["Queen's University"],
+      "aliases": ["eng chem", "engchem"],
+      "admission_type": { "Queen's University": "faculty" }
+    },
+    {
+      "canonical_name": "Computer Science",
+      "category": "COMPUTER_SCIENCE",
+      "schools": ["UBC Vancouver", "University of Waterloo", "University of Toronto", "Western University", "Queen's University", "McMaster University", "Simon Fraser University", "University of Alberta", "University of Calgary", "University of Ottawa", "Dalhousie University"],
+      "aliases": ["cs", "comp sci", "compsci", "computer science", "cpsc"],
+      "admission_type": {
+        "UBC Vancouver": "faculty",
+        "University of Waterloo": "direct",
+        "University of Toronto": "faculty",
+        "Western University": "faculty",
+        "Queen's University": "direct",
+        "McMaster University": "faculty",
+        "Simon Fraser University": "direct",
+        "University of Alberta": "direct",
+        "University of Calgary": "direct",
+        "University of Ottawa": "direct",
+        "Dalhousie University": "direct"
+      },
+      "notes": "UBC CS is in Faculty of Science (BSc) or Faculty of Arts (BA). UofT CS is in Arts & Science, declared as POSt after Year 1. Waterloo CS is in Faculty of Mathematics."
+    },
+    {
+      "canonical_name": "Computing Science",
+      "category": "COMPUTER_SCIENCE",
+      "schools": ["Simon Fraser University"],
+      "aliases": ["cmpt", "computing science", "comp sci sfu"],
+      "admission_type": { "Simon Fraser University": "direct" },
+      "notes": "SFU uses 'Computing Science' not 'Computer Science'. Often confused on Reddit."
+    },
+    {
+      "canonical_name": "Data Science",
+      "category": "COMPUTER_SCIENCE",
+      "schools": ["University of Waterloo", "University of Toronto", "McMaster University", "University of Ottawa", "University of Calgary"],
+      "aliases": ["data sci", "DS", "data science"],
+      "admission_type": {
+        "University of Waterloo": "direct",
+        "University of Toronto": "faculty",
+        "McMaster University": "faculty",
+        "University of Ottawa": "direct",
+        "University of Calgary": "direct"
+      }
+    },
+    {
+      "canonical_name": "Software Engineering (BSc)",
+      "category": "COMPUTER_SCIENCE",
+      "schools": ["UBC Vancouver", "University of Calgary"],
+      "aliases": ["swe bsc", "software eng science"],
+      "admission_type": {
+        "UBC Vancouver": "faculty",
+        "University of Calgary": "direct"
+      },
+      "notes": "UBC Software Engineering is a BSc option within CS, not a BASc engineering degree. Distinct from Waterloo SE which is an engineering degree."
+    },
+    {
+      "canonical_name": "Computer Science and Business",
+      "category": "COMPUTER_SCIENCE",
+      "schools": ["University of Waterloo"],
+      "aliases": ["cs business", "math business", "math/bba", "CS/BBA", "double degree"],
+      "admission_type": { "University of Waterloo": "direct" },
+      "notes": "Double degree with Wilfrid Laurier University BBA."
+    },
+    {
+      "canonical_name": "Information Technology",
+      "category": "COMPUTER_SCIENCE",
+      "schools": ["University of Ottawa"],
+      "aliases": ["IT", "info tech"],
+      "admission_type": { "University of Ottawa": "direct" }
+    },
+    {
+      "canonical_name": "Cognitive Systems",
+      "category": "COMPUTER_SCIENCE",
+      "schools": ["UBC Vancouver"],
+      "aliases": ["cogs", "cognitive systems", "COGS"],
+      "admission_type": { "UBC Vancouver": "faculty" },
+      "notes": "Interdisciplinary: CS + Psychology + Philosophy + Linguistics. Two streams: Cognition and Brain, Computational Intelligence and Design."
+    },
+    {
+      "canonical_name": "Biology",
+      "category": "SCIENCE",
+      "schools": ["UBC Vancouver", "University of Waterloo", "University of Toronto", "Western University", "Queen's University", "McMaster University", "Simon Fraser University", "University of Alberta", "University of Calgary", "University of Ottawa", "Dalhousie University"],
+      "aliases": ["bio", "biology", "biol"]
+    },
+    {
+      "canonical_name": "Biochemistry",
+      "category": "SCIENCE",
+      "schools": ["UBC Vancouver", "University of Waterloo", "University of Toronto", "Western University", "Queen's University", "McMaster University", "Simon Fraser University", "University of Alberta", "University of Calgary", "University of Ottawa", "Dalhousie University"],
+      "aliases": ["biochem", "bioc"]
+    },
+    {
+      "canonical_name": "Chemistry",
+      "category": "SCIENCE",
+      "schools": ["UBC Vancouver", "University of Waterloo", "University of Toronto", "Western University", "Queen's University", "McMaster University", "Simon Fraser University", "University of Alberta", "University of Calgary", "University of Ottawa", "Dalhousie University"],
+      "aliases": ["chem", "chemistry"]
+    },
+    {
+      "canonical_name": "Physics",
+      "category": "SCIENCE",
+      "schools": ["UBC Vancouver", "University of Waterloo", "University of Toronto", "Western University", "Queen's University", "McMaster University", "Simon Fraser University", "University of Alberta", "University of Calgary", "University of Ottawa", "Dalhousie University"],
+      "aliases": ["phys", "physics"]
+    },
+    {
+      "canonical_name": "Mathematics",
+      "category": "SCIENCE",
+      "schools": ["UBC Vancouver", "University of Waterloo", "University of Toronto", "Western University", "Queen's University", "McMaster University", "Simon Fraser University", "University of Alberta", "University of Calgary", "University of Ottawa", "Dalhousie University"],
+      "aliases": ["math", "maths", "mathematics"]
+    },
+    {
+      "canonical_name": "Statistics",
+      "category": "SCIENCE",
+      "schools": ["UBC Vancouver", "University of Waterloo", "University of Toronto", "Western University", "Simon Fraser University", "University of Alberta", "University of Calgary", "Dalhousie University"],
+      "aliases": ["stats", "stat", "statistics"]
+    },
+    {
+      "canonical_name": "Actuarial Science",
+      "category": "SCIENCE",
+      "schools": ["University of Waterloo", "University of Toronto", "Western University", "Simon Fraser University", "University of Calgary"],
+      "aliases": ["actuary", "actuarial", "act sci"]
+    },
+    {
+      "canonical_name": "Earth and Ocean Sciences",
+      "category": "SCIENCE",
+      "schools": ["UBC Vancouver"],
+      "aliases": ["EOSC", "earth science", "geoscience", "oceanography"]
+    },
+    {
+      "canonical_name": "Earth Sciences",
+      "category": "SCIENCE",
+      "schools": ["University of Waterloo", "University of Toronto", "Western University", "Simon Fraser University", "University of Ottawa", "Dalhousie University", "University of Alberta", "University of Calgary"],
+      "aliases": ["earth sci", "geology", "geoscience"]
+    },
+    {
+      "canonical_name": "Environmental Science",
+      "category": "SCIENCE",
+      "schools": ["UBC Vancouver", "University of Waterloo", "University of Toronto", "Western University", "Queen's University", "McMaster University", "Simon Fraser University", "University of Alberta", "University of Calgary", "University of Ottawa", "Dalhousie University"],
+      "aliases": ["env sci", "enviro sci", "environmental"]
+    },
+    {
+      "canonical_name": "Microbiology",
+      "category": "SCIENCE",
+      "schools": ["UBC Vancouver", "University of Toronto", "University of Alberta", "Dalhousie University"],
+      "aliases": ["micro", "microbio", "microbiology and immunology"]
+    },
+    {
+      "canonical_name": "Astronomy",
+      "category": "SCIENCE",
+      "schools": ["UBC Vancouver", "University of Waterloo", "University of Toronto", "Western University"],
+      "aliases": ["astro", "astrophysics", "physics and astronomy"]
+    },
+    {
+      "canonical_name": "Biomedical Sciences",
+      "category": "SCIENCE",
+      "schools": ["University of Waterloo", "University of Ottawa"],
+      "aliases": ["biomed sci", "biomedical"]
+    },
+    {
+      "canonical_name": "Medical Sciences",
+      "category": "SCIENCE",
+      "schools": ["Western University", "University of Alberta"],
+      "aliases": ["med sci", "medsci", "medical science", "bmedsc"]
+    },
+    {
+      "canonical_name": "Life Sciences",
+      "category": "SCIENCE",
+      "schools": ["University of Toronto", "McMaster University", "Queen's University"],
+      "aliases": ["life sci", "lifesci"]
+    },
+    {
+      "canonical_name": "Physical Sciences",
+      "category": "SCIENCE",
+      "schools": ["University of Toronto", "University of Waterloo"],
+      "aliases": ["phys sci", "physical sci"]
+    },
+    {
+      "canonical_name": "Integrated Sciences",
+      "category": "SCIENCE",
+      "schools": ["UBC Vancouver"],
+      "aliases": ["integrated sci", "isci"]
+    },
+    {
+      "canonical_name": "Pharmacology",
+      "category": "SCIENCE",
+      "schools": ["UBC Vancouver", "University of Toronto", "University of Alberta", "Dalhousie University"],
+      "aliases": ["pharm", "pharmacology"]
+    },
+    {
+      "canonical_name": "Neuroscience",
+      "category": "SCIENCE",
+      "schools": ["University of Toronto", "McMaster University", "University of Alberta", "Dalhousie University", "University of Calgary"],
+      "aliases": ["neuro", "neurosci"]
+    },
+    {
+      "canonical_name": "Psychology (BSc)",
+      "category": "SCIENCE",
+      "schools": ["UBC Vancouver", "University of Waterloo", "University of Toronto", "Western University", "Queen's University", "McMaster University", "Simon Fraser University", "University of Alberta", "University of Calgary", "University of Ottawa", "Dalhousie University"],
+      "aliases": ["psych bsc", "psychology science"]
+    },
+    {
+      "canonical_name": "Applied Mathematics",
+      "category": "SCIENCE",
+      "schools": ["University of Waterloo", "University of Calgary"],
+      "aliases": ["applied math", "amath"]
+    },
+    {
+      "canonical_name": "Combinatorics and Optimization",
+      "category": "SCIENCE",
+      "schools": ["University of Waterloo"],
+      "aliases": ["C&O", "combinatorics"]
+    },
+    {
+      "canonical_name": "Mathematical Physics",
+      "category": "SCIENCE",
+      "schools": ["University of Waterloo"],
+      "aliases": ["math phys", "mathematical physics"]
+    },
+    {
+      "canonical_name": "Bioinformatics",
+      "category": "SCIENCE",
+      "schools": ["University of Waterloo", "University of Ottawa"],
+      "aliases": ["bioinformatics", "bioinfo"]
+    },
+    {
+      "canonical_name": "Pharmacy",
+      "category": "SCIENCE",
+      "schools": ["University of Waterloo", "University of Toronto", "University of Alberta", "Dalhousie University"],
+      "aliases": ["pharmd", "pharmacy"],
+      "notes": "Usually a professional program (PharmD) but at Waterloo it's a direct-entry undergraduate program."
+    },
+    {
+      "canonical_name": "Materials and Nanosciences",
+      "category": "SCIENCE",
+      "schools": ["University of Waterloo"],
+      "aliases": ["nano", "materials nano", "nanoscience"]
+    },
+    {
+      "canonical_name": "Marine Biology",
+      "category": "SCIENCE",
+      "schools": ["UBC Vancouver", "Dalhousie University"],
+      "aliases": ["marine bio", "marine biology"]
+    },
+    {
+      "canonical_name": "Commerce",
+      "category": "BUSINESS",
+      "schools": ["UBC Vancouver", "Queen's University", "Dalhousie University", "University of Ottawa", "University of Calgary"],
+      "aliases": ["commerce", "comm", "bcom", "b.comm", "business"],
+      "notes": "UBC = Sauder School of Business. Queen's = Smith School of Business. Often the most discussed business program on Reddit for each school."
+    },
+    {
+      "canonical_name": "Business Administration",
+      "category": "BUSINESS",
+      "schools": ["Western University", "Simon Fraser University", "University of Alberta"],
+      "aliases": ["bba", "BBA", "business admin", "business administration", "ivey"],
+      "notes": "Western = Ivey Business School (HBA after Year 2, applies from any first-year program). UAlberta = Alberta School of Business."
+    },
+    {
+      "canonical_name": "Accounting and Financial Management",
+      "category": "BUSINESS",
+      "schools": ["University of Waterloo"],
+      "aliases": ["AFM", "accounting", "afm"],
+      "admission_type": { "University of Waterloo": "direct" }
+    },
+    {
+      "canonical_name": "Mathematics/Business Administration",
+      "category": "BUSINESS",
+      "schools": ["University of Waterloo"],
+      "aliases": ["math/BBA", "double degree", "math business", "DD"],
+      "admission_type": { "University of Waterloo": "direct" },
+      "notes": "Double degree with Wilfrid Laurier University."
+    },
+    {
+      "canonical_name": "Mathematics/Chartered Professional Accountancy",
+      "category": "BUSINESS",
+      "schools": ["University of Waterloo"],
+      "aliases": ["math/CPA", "CPA", "accounting math"],
+      "admission_type": { "University of Waterloo": "direct" }
+    },
+    {
+      "canonical_name": "Mathematical Finance",
+      "category": "BUSINESS",
+      "schools": ["University of Waterloo"],
+      "aliases": ["math fin", "quant finance", "mathematical finance"],
+      "admission_type": { "University of Waterloo": "direct" }
+    },
+    {
+      "canonical_name": "Financial Analysis and Risk Management",
+      "category": "BUSINESS",
+      "schools": ["University of Waterloo"],
+      "aliases": ["FARM", "risk management"],
+      "admission_type": { "University of Waterloo": "direct" }
+    },
+    {
+      "canonical_name": "Rotman Commerce",
+      "category": "BUSINESS",
+      "schools": ["University of Toronto"],
+      "aliases": ["rotman", "uoft commerce", "RC", "rotman commerce"],
+      "admission_type": { "University of Toronto": "direct" }
+    },
+    {
+      "canonical_name": "Management",
+      "category": "BUSINESS",
+      "schools": ["McMaster University", "University of Calgary"],
+      "aliases": ["mgmt", "management", "degroote"],
+      "notes": "McMaster = DeGroote School of Business."
+    },
+    {
+      "canonical_name": "Honours Arts and Business",
+      "category": "BUSINESS",
+      "schools": ["University of Waterloo"],
+      "aliases": ["arts and business", "arbus"],
+      "admission_type": { "University of Waterloo": "direct" }
+    },
+    {
+      "canonical_name": "Biotechnology/Economics",
+      "category": "BUSINESS",
+      "schools": ["University of Waterloo"],
+      "aliases": ["biotech econ", "biotechnology economics"],
+      "admission_type": { "University of Waterloo": "direct" }
+    },
+    {
+      "canonical_name": "Health Sciences",
+      "category": "HEALTH",
+      "schools": ["University of Waterloo", "McMaster University", "Queen's University", "Western University", "Simon Fraser University", "University of Ottawa", "University of Calgary", "University of Alberta"],
+      "aliases": ["health sci", "bhsc", "healthsci", "health sciences"],
+      "notes": "McMaster BHSc is the most competitive / well-known of these. Western has its own BHSc (Brescia)."
+    },
+    {
+      "canonical_name": "Kinesiology",
+      "category": "HEALTH",
+      "schools": ["UBC Vancouver", "University of Waterloo", "University of Toronto", "Western University", "Queen's University", "McMaster University", "Simon Fraser University", "University of Alberta", "University of Calgary", "University of Ottawa", "Dalhousie University"],
+      "aliases": ["kin", "kines", "kinesiology"]
+    },
+    {
+      "canonical_name": "Nursing",
+      "category": "HEALTH",
+      "schools": ["UBC Vancouver", "University of Toronto", "Western University", "Queen's University", "McMaster University", "University of Alberta", "University of Calgary", "University of Ottawa", "Dalhousie University"],
+      "aliases": ["nursing", "BScN", "bscn"]
+    },
+    {
+      "canonical_name": "Public Health",
+      "category": "HEALTH",
+      "schools": ["University of Waterloo", "Simon Fraser University", "University of Ottawa", "University of Alberta"],
+      "aliases": ["public health", "pub health"]
+    },
+    {
+      "canonical_name": "Life Sciences (Pre-Med pathway)",
+      "category": "HEALTH",
+      "schools": ["University of Toronto", "McMaster University", "Queen's University", "Western University"],
+      "aliases": ["life sci", "lifesci", "premed", "pre-med"],
+      "notes": "Not a distinct program from Science Life Sciences in some schools, but on Reddit this is the pre-med track discussion context."
+    },
+    {
+      "canonical_name": "Biomedical Sciences",
+      "category": "HEALTH",
+      "schools": ["University of Waterloo", "University of Ottawa", "University of Calgary"],
+      "aliases": ["biomed sci", "biomedical science"]
+    },
+    {
+      "canonical_name": "Optometry",
+      "category": "HEALTH",
+      "schools": ["University of Waterloo"],
+      "aliases": ["optometry", "OD"],
+      "notes": "Only English-language optometry school in Canada."
+    },
+    {
+      "canonical_name": "Recreation and Leisure Studies",
+      "category": "HEALTH",
+      "schools": ["University of Waterloo"],
+      "aliases": ["rec and leisure", "recreation"]
+    },
+    {
+      "canonical_name": "Therapeutic Recreation",
+      "category": "HEALTH",
+      "schools": ["University of Waterloo"],
+      "aliases": ["therapeutic rec"]
+    },
+    {
+      "canonical_name": "Medical Laboratory Science",
+      "category": "HEALTH",
+      "schools": ["University of Alberta"],
+      "aliases": ["med lab sci", "MLS"]
+    },
+    {
+      "canonical_name": "Psychology (BA)",
+      "category": "ARTS",
+      "schools": ["UBC Vancouver", "University of Waterloo", "University of Toronto", "Western University", "Queen's University", "McMaster University", "Simon Fraser University", "University of Alberta", "University of Calgary", "University of Ottawa", "Dalhousie University"],
+      "aliases": ["psych", "psychology", "psych BA"]
+    },
+    {
+      "canonical_name": "Economics",
+      "category": "ARTS",
+      "schools": ["UBC Vancouver", "University of Waterloo", "University of Toronto", "Western University", "Queen's University", "McMaster University", "Simon Fraser University", "University of Alberta", "University of Calgary", "University of Ottawa", "Dalhousie University"],
+      "aliases": ["econ", "economics"]
+    },
+    {
+      "canonical_name": "Political Science",
+      "category": "ARTS",
+      "schools": ["UBC Vancouver", "University of Waterloo", "University of Toronto", "Western University", "Queen's University", "McMaster University", "Simon Fraser University", "University of Alberta", "University of Calgary", "University of Ottawa", "Dalhousie University"],
+      "aliases": ["poli sci", "polisci", "political science"]
+    },
+    {
+      "canonical_name": "English",
+      "category": "ARTS",
+      "schools": ["UBC Vancouver", "University of Waterloo", "University of Toronto", "Western University", "Queen's University", "McMaster University", "Simon Fraser University", "University of Alberta", "University of Calgary", "University of Ottawa", "Dalhousie University"],
+      "aliases": ["english", "eng lit", "english literature"]
+    },
+    {
+      "canonical_name": "Philosophy",
+      "category": "ARTS",
+      "schools": ["UBC Vancouver", "University of Waterloo", "University of Toronto", "Western University", "Queen's University", "McMaster University", "Simon Fraser University", "University of Alberta", "University of Calgary", "University of Ottawa", "Dalhousie University"],
+      "aliases": ["phil", "philosophy"]
+    },
+    {
+      "canonical_name": "History",
+      "category": "ARTS",
+      "schools": ["UBC Vancouver", "University of Waterloo", "University of Toronto", "Western University", "Queen's University", "McMaster University", "Simon Fraser University", "University of Alberta", "University of Calgary", "University of Ottawa", "Dalhousie University"],
+      "aliases": ["history", "hist"]
+    },
+    {
+      "canonical_name": "Sociology",
+      "category": "ARTS",
+      "schools": ["UBC Vancouver", "University of Waterloo", "University of Toronto", "Western University", "Queen's University", "McMaster University", "Simon Fraser University", "University of Alberta", "University of Calgary", "University of Ottawa", "Dalhousie University"],
+      "aliases": ["soc", "sociology"]
+    },
+    {
+      "canonical_name": "International Relations",
+      "category": "ARTS",
+      "schools": ["UBC Vancouver", "University of Toronto", "Western University", "Queen's University", "University of Ottawa"],
+      "aliases": ["IR", "international relations", "intl relations"]
+    },
+    {
+      "canonical_name": "Linguistics",
+      "category": "ARTS",
+      "schools": ["UBC Vancouver", "University of Toronto", "Simon Fraser University", "University of Alberta", "University of Calgary"],
+      "aliases": ["ling", "linguistics"]
+    },
+    {
+      "canonical_name": "Geography",
+      "category": "ARTS",
+      "schools": ["UBC Vancouver", "University of Waterloo", "University of Toronto", "Western University", "Queen's University", "McMaster University", "Simon Fraser University", "University of Alberta", "University of Calgary", "University of Ottawa"],
+      "aliases": ["geog", "geography"]
+    },
+    {
+      "canonical_name": "Media Studies",
+      "category": "ARTS",
+      "schools": ["Western University", "University of Toronto", "Queen's University", "University of Ottawa", "University of Calgary"],
+      "aliases": ["media", "media studies", "film studies", "communication studies"]
+    },
+    {
+      "canonical_name": "Anthropology",
+      "category": "ARTS",
+      "schools": ["UBC Vancouver", "University of Waterloo", "University of Toronto", "Western University", "McMaster University", "Simon Fraser University", "University of Alberta", "University of Calgary"],
+      "aliases": ["anthro", "anthropology"]
+    },
+    {
+      "canonical_name": "Criminology",
+      "category": "ARTS",
+      "schools": ["Simon Fraser University", "University of Ottawa", "University of Alberta"],
+      "aliases": ["crim", "criminology"],
+      "notes": "SFU has one of the most well-known Criminology programs in Canada."
+    },
+    {
+      "canonical_name": "Communication",
+      "category": "ARTS",
+      "schools": ["Simon Fraser University", "University of Ottawa", "University of Calgary"],
+      "aliases": ["comm arts", "communication"]
+    },
+    {
+      "canonical_name": "Fine Arts",
+      "category": "ARTS",
+      "schools": ["UBC Vancouver", "University of Waterloo", "University of Toronto", "Western University", "Queen's University", "University of Alberta", "University of Calgary"],
+      "aliases": ["fine arts", "BFA", "visual arts", "studio art"]
+    },
+    {
+      "canonical_name": "Music",
+      "category": "ARTS",
+      "schools": ["UBC Vancouver", "University of Waterloo", "University of Toronto", "Western University", "Queen's University", "McMaster University", "University of Alberta", "University of Calgary", "University of Ottawa", "Dalhousie University"],
+      "aliases": ["music", "BMus"]
+    },
+    {
+      "canonical_name": "Film Studies",
+      "category": "ARTS",
+      "schools": ["UBC Vancouver", "University of Toronto", "Western University", "Queen's University"],
+      "aliases": ["film", "cinema", "film studies"]
+    },
+    {
+      "canonical_name": "Creative Writing",
+      "category": "ARTS",
+      "schools": ["UBC Vancouver"],
+      "aliases": ["creative writing", "CW"]
+    },
+    {
+      "canonical_name": "Architecture",
+      "category": "ARTS",
+      "schools": ["University of Waterloo", "University of Toronto", "University of Calgary"],
+      "aliases": ["arch", "architecture"],
+      "notes": "Waterloo Architecture is co-op based in Cambridge, ON. UofT is Daniels Faculty."
+    },
+    {
+      "canonical_name": "Planning",
+      "category": "ARTS",
+      "schools": ["University of Waterloo"],
+      "aliases": ["urban planning", "planning"]
+    },
+    {
+      "canonical_name": "Knowledge Integration",
+      "category": "ARTS",
+      "schools": ["University of Waterloo"],
+      "aliases": ["KI", "knowledge integration"],
+      "notes": "Unique interdisciplinary program at Waterloo."
+    },
+    {
+      "canonical_name": "Social Work",
+      "category": "ARTS",
+      "schools": ["University of Waterloo", "McMaster University", "University of Calgary", "Dalhousie University"],
+      "aliases": ["social work", "BSW"]
+    },
+    {
+      "canonical_name": "Gender Studies",
+      "category": "ARTS",
+      "schools": ["UBC Vancouver", "University of Toronto", "Queen's University", "Simon Fraser University"],
+      "aliases": ["gender studies", "women's studies", "GSWS"]
+    },
+    {
+      "canonical_name": "Indigenous Studies",
+      "category": "ARTS",
+      "schools": ["UBC Vancouver", "University of Toronto", "University of Alberta"],
+      "aliases": ["indigenous studies", "first nations studies"]
+    },
+    {
+      "canonical_name": "Global Health",
+      "category": "HEALTH",
+      "schools": ["McMaster University"],
+      "aliases": ["global health"]
+    },
+    {
+      "canonical_name": "French",
+      "category": "ARTS",
+      "schools": ["UBC Vancouver", "University of Waterloo", "University of Toronto", "Western University", "Queen's University", "McMaster University", "University of Ottawa", "Dalhousie University"],
+      "aliases": ["french", "french studies"],
+      "notes": "University of Ottawa is Canada's largest bilingual university — French programs are especially strong there."
+    },
+    {
+      "canonical_name": "Honours Arts",
+      "category": "ARTS",
+      "schools": ["University of Waterloo"],
+      "aliases": ["arts", "BA", "honours arts"],
+      "notes": "Waterloo umbrella program with 28+ available majors. Students apply to Honours Arts and pick a major."
+    },
+    {
+      "canonical_name": "General Science",
+      "category": "SCIENCE",
+      "schools": ["University of Waterloo", "Simon Fraser University", "Dalhousie University"],
+      "aliases": ["gen sci", "general science"]
+    },
+    {
+      "canonical_name": "Mechatronics and Biomedical Engineering",
+      "category": "ENGINEERING",
+      "schools": ["McMaster University"],
+      "aliases": ["mech tron biomed", "mcmaster tron"],
+      "admission_type": { "McMaster University": "faculty" }
+    }
+  ]
+}
