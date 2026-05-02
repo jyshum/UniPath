@@ -1,4 +1,6 @@
 import pytest
+import subprocess
+import sys
 from sqlalchemy import inspect
 from sqlalchemy.orm import Session
 
@@ -110,6 +112,38 @@ def test_upsert_profile_for_student_is_idempotent(tmp_path):
         assert session.query(ApplicantProfile).first().source_student_id == student_id
 
 
+def test_upsert_profile_for_student_does_not_rewrite_unchanged_profile(tmp_path):
+    db_path = tmp_path / "profiles.db"
+    engine = init_db(str(db_path))
+
+    with Session(engine) as session:
+        student = Student(
+            source="USER_SUBMITTED",
+            school_normalized="UBC Vancouver",
+            program_normalized="Engineering",
+            program_category="ENGINEERING",
+            decision="ACCEPTED",
+            core_avg=95.0,
+            ec_raw="Robotics captain, AP Physics 97",
+        )
+        session.add(student)
+        session.commit()
+
+        profile = upsert_profile_for_student(session, student)
+        session.commit()
+        original_updated_at = profile.updated_at
+        original_course_id = session.query(ApplicantCourse).one().id
+        original_activity_id = session.query(ApplicantActivity).one().id
+
+        upsert_profile_for_student(session, student)
+        session.commit()
+
+        unchanged_profile = session.query(ApplicantProfile).one()
+        assert unchanged_profile.updated_at == original_updated_at
+        assert session.query(ApplicantCourse).one().id == original_course_id
+        assert session.query(ApplicantActivity).one().id == original_activity_id
+
+
 from scripts.backfill_applicant_profiles import backfill_applicant_profiles
 
 
@@ -141,3 +175,31 @@ def test_backfill_applicant_profiles_skips_incomplete_rows(tmp_path):
     summary = backfill_applicant_profiles(str(db_path))
 
     assert summary == {"checked": 2, "created_or_updated": 1, "skipped": 1}
+
+
+def test_backfill_script_runs_when_executed_directly(tmp_path):
+    db_path = tmp_path / "profiles.db"
+    engine = init_db(str(db_path))
+
+    with Session(engine) as session:
+        session.add(Student(
+            source="BC_2025",
+            school_normalized="UBC Vancouver",
+            program_normalized="Science",
+            program_category="SCIENCE",
+            decision="ACCEPTED",
+            core_avg=93.0,
+            ec_raw="Science fair award",
+        ))
+        session.commit()
+
+    result = subprocess.run(
+        [sys.executable, "scripts/backfill_applicant_profiles.py", str(db_path)],
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+
+    assert result.returncode == 0
+    assert "'checked': 1" in result.stdout
+    assert "'created_or_updated': 1" in result.stdout

@@ -86,6 +86,76 @@ def _completeness(
     return round(min(score, 1.0), 2)
 
 
+PROFILE_COMPARE_FIELDS = (
+    "source_student_id",
+    "source",
+    "source_url",
+    "source_confidence",
+    "school_normalized",
+    "program_normalized",
+    "program_category",
+    "admission_year",
+    "decision",
+    "decision_confidence",
+    "province",
+    "citizenship",
+    "grade_average",
+    "grade_context",
+    "grade_confidence",
+    "curriculum_type",
+    "course_rigor_score",
+    "profile_completeness_score",
+)
+
+
+COURSE_COMPARE_FIELDS = (
+    "course_name",
+    "course_subject",
+    "course_level",
+    "grade",
+    "is_required_for_program",
+    "source_confidence",
+)
+
+
+ACTIVITY_COMPARE_FIELDS = (
+    "category",
+    "activity_type",
+    "raw_text",
+    "role_level",
+    "duration_months",
+    "achievement_level",
+    "program_relevance",
+    "source_confidence",
+)
+
+
+def _object_signature(obj, fields: tuple[str, ...]) -> tuple:
+    return tuple(getattr(obj, field) for field in fields)
+
+
+def _child_signatures(children: list, fields: tuple[str, ...]) -> list[tuple]:
+    return sorted(_object_signature(child, fields) for child in children)
+
+
+def _profile_matches_existing(
+    existing: ApplicantProfile,
+    profile: ApplicantProfile,
+    existing_courses: list[ApplicantCourse],
+    courses: list[ApplicantCourse],
+    existing_activities: list[ApplicantActivity],
+    activities: list[ApplicantActivity],
+) -> bool:
+    return (
+        _object_signature(existing, PROFILE_COMPARE_FIELDS)
+        == _object_signature(profile, PROFILE_COMPARE_FIELDS)
+        and _child_signatures(existing_courses, COURSE_COMPARE_FIELDS)
+        == _child_signatures(courses, COURSE_COMPARE_FIELDS)
+        and _child_signatures(existing_activities, ACTIVITY_COMPARE_FIELDS)
+        == _child_signatures(activities, ACTIVITY_COMPARE_FIELDS)
+    )
+
+
 def build_profile_from_student(
     student: Student,
 ) -> tuple[ApplicantProfile, list[ApplicantCourse], list[ApplicantActivity]]:
@@ -139,6 +209,22 @@ def upsert_profile_for_student(session: Session, student: Student) -> ApplicantP
     profile, courses, activities = build_profile_from_student(student)
 
     if existing:
+        existing_courses = session.query(ApplicantCourse).filter(
+            ApplicantCourse.profile_id == existing.id
+        ).all()
+        existing_activities = session.query(ApplicantActivity).filter(
+            ApplicantActivity.profile_id == existing.id
+        ).all()
+        if _profile_matches_existing(
+            existing,
+            profile,
+            existing_courses,
+            courses,
+            existing_activities,
+            activities,
+        ):
+            return existing
+
         profile.id = existing.id
         profile.created_at = existing.created_at
         session.query(ApplicantCourse).filter(

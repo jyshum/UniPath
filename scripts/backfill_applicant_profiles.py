@@ -1,3 +1,8 @@
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).parent.parent))
+
 from sqlalchemy.orm import Session
 
 from core.profile_enrichment import is_profile_eligible, upsert_profile_for_student
@@ -31,4 +36,5 @@ def backfill_applicant_profiles(db_path: str = "database/unipath.db") -> dict:
 
 
 if __name__ == "__main__":
-    backfill_applicant_profiles()
+    db_path = sys.argv[1] if len(sys.argv) > 1 else "database/unipath.db"
+    backfill_applicant_profiles(db_path)
