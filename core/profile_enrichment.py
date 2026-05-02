@@ -10,6 +10,10 @@ from core.profile_taxonomy import (
 from database.models import ApplicantActivity, ApplicantCourse, ApplicantProfile, Student
 
 
+class ProfileEnrichmentError(ValueError):
+    pass
+
+
 def _grade_context(student: Student) -> str:
     if student.core_avg is not None:
         return "CORE_AVERAGE"
@@ -40,6 +44,27 @@ def _source_confidence(source: str | None) -> float:
     return 0.4
 
 
+def is_profile_eligible(student: Student) -> bool:
+    return bool(
+        student.source
+        and student.school_normalized
+        and student.program_normalized
+        and _grade_average(student) is not None
+    )
+
+
+def _dedupe_course_signals(course_signals: list[dict]) -> list[dict]:
+    deduped = []
+    seen = set()
+    for signal in course_signals:
+        key = (signal["course_name"], signal["course_level"], signal["grade"])
+        if key in seen:
+            continue
+        deduped.append(signal)
+        seen.add(key)
+    return deduped
+
+
 def _completeness(
     student: Student,
     courses: list[ApplicantCourse],
@@ -64,12 +89,17 @@ def _completeness(
 def build_profile_from_student(
     student: Student,
 ) -> tuple[ApplicantProfile, list[ApplicantCourse], list[ApplicantActivity]]:
+    if not is_profile_eligible(student):
+        raise ProfileEnrichmentError(
+            "Student must include source, school, program, and grade average"
+        )
+
     raw_text = " ".join(
         part
         for part in [student.ec_raw, student.comments_raw, student.circumstances_raw]
         if part
     )
-    course_signals = extract_course_signals(raw_text)
+    course_signals = _dedupe_course_signals(extract_course_signals(raw_text))
     activity_signals = extract_activity_signals(student.ec_raw or raw_text)
     now = datetime.now(timezone.utc).isoformat()
 

@@ -1,7 +1,13 @@
+import pytest
 from sqlalchemy import inspect
 from sqlalchemy.orm import Session
 
-from core.profile_enrichment import build_profile_from_student, upsert_profile_for_student
+from core.profile_enrichment import (
+    ProfileEnrichmentError,
+    build_profile_from_student,
+    is_profile_eligible,
+    upsert_profile_for_student,
+)
 from database.models import ApplicantActivity, ApplicantCourse, ApplicantProfile, Student, init_db
 
 
@@ -42,6 +48,37 @@ def test_build_profile_from_student_extracts_profile_fields():
     assert profile.profile_completeness_score > 0.5
     assert courses[0].course_name == "Math"
     assert activities[0].activity_type == "DECA"
+
+
+def test_incomplete_student_is_ineligible_and_raises_domain_error():
+    student = Student(
+        source="USER_SUBMITTED",
+        core_avg=92.0,
+        ec_raw="Student council president",
+    )
+
+    assert is_profile_eligible(student) is False
+
+    with pytest.raises(ProfileEnrichmentError):
+        build_profile_from_student(student)
+
+
+def test_build_profile_from_student_deduplicates_course_mentions():
+    student = Student(
+        id=2,
+        source="USER_SUBMITTED",
+        school_normalized="UBC Vancouver",
+        program_normalized="Engineering",
+        program_category="ENGINEERING",
+        core_avg=95.0,
+        ec_raw="AP Physics 97. AP Physics 97.",
+    )
+
+    profile, courses, _activities = build_profile_from_student(student)
+
+    assert len(courses) == 1
+    assert courses[0].course_name == "Physics"
+    assert profile.course_rigor_score == 0.25
 
 
 def test_upsert_profile_for_student_is_idempotent(tmp_path):
