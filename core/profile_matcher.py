@@ -1,4 +1,4 @@
-from collections import Counter, defaultdict
+from collections import defaultdict
 from statistics import median
 
 from sqlalchemy.orm import Session
@@ -151,13 +151,17 @@ def match_profiles(db_path: str, query: dict) -> dict:
         for profile in ranked
         if profile.decision in {"REJECTED", "WAITLISTED"}
     ]
+    ec_rich_profiles = sum(
+        1 for profile in profiles if activities.get(profile.id)
+    )
 
     return {
         "school": school,
         "program": program,
         "data_confidence": {
             "label": _confidence_label(len(profiles)),
-            "support_count": len(profiles),
+            "total_profiles": len(profiles),
+            "ec_rich_profiles": ec_rich_profiles,
         },
         "grade_percentile": _grade_percentile(profiles, query.get("grade_average")),
         "accepted_matches": accepted,

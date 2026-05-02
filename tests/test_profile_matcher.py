@@ -59,6 +59,8 @@ def test_match_profiles_returns_nearest_accepted_and_rejected(tmp_path):
     )
 
     assert result["data_confidence"]["label"] == "medium"
+    assert result["data_confidence"]["total_profiles"] == 3
+    assert result["data_confidence"]["ec_rich_profiles"] == 3
     assert result["grade_percentile"] == 67
     assert result["accepted_matches"][0]["decision"] == "ACCEPTED"
     assert result["accepted_matches"][0]["activity_types"] == ["DECA"]
