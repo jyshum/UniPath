@@ -80,6 +80,14 @@ def _grade_out_of_range(grade: Optional[float]) -> bool:
     return grade is not None and not (50 <= grade <= 100)
 
 
+def _public_activity(activity: dict) -> dict:
+    return {
+        key: value
+        for key, value in activity.items()
+        if key != "raw_text"
+    }
+
+
 @app.get("/health")
 def health():
     return {"status": "ok"}
@@ -156,9 +164,15 @@ def get_program_stats(school: str, program_name: str):
 def post_profile_match(req: ProfileMatchRequest):
     if _grade_out_of_range(req.grade_average):
         return {"error": "grade_out_of_range"}
+    school_normalized, _ = normalize_school(req.school)
+    if school_normalized is None:
+        return {"error": "unknown_school"}
+    program_normalized = normalize_program_name(req.program, school=school_normalized)
+    if get_program_category(program_normalized) == "OTHER":
+        return {"error": "unknown_program"}
     return match_profiles(_profile_db_path(), {
-        "school": req.school,
-        "program": req.program,
+        "school": school_normalized,
+        "program": program_normalized,
         "grade_average": req.grade_average,
         "curriculum_type": req.curriculum_type,
         "activities": [activity.model_dump() for activity in req.activities],
@@ -181,7 +195,7 @@ def create_profile(req: CreateProfileRequest):
         "normalized_school": school_normalized,
         "normalized_program": program_normalized,
         "activity_count": len(activities),
-        "activities": activities,
+        "activities": [_public_activity(activity) for activity in activities],
     }
 
 
@@ -219,6 +233,7 @@ def submit_outcome(req: SubmitOutcomeRequest):
     decision = normalize_decision(req.decision)
     province = normalize_province(req.province) if req.province else None
     program_category = tag_program(req.program)
+    program_normalized = normalize_program_name(req.program, school=school_normalized)
     ec_tags = _json.dumps(tag_ec(req.ecs)) if req.ecs else _json.dumps(["NONE"])
     circumstance_tags = _json.dumps(["NONE"])
 
@@ -229,6 +244,7 @@ def submit_outcome(req: SubmitOutcomeRequest):
         multi_school_flag=multi,
         program_raw=req.program,
         program_category=program_category,
+        program_normalized=program_normalized,
         decision=decision,
         core_avg=req.grade,
         ec_raw=req.ecs,

@@ -32,7 +32,8 @@ def test_submit_valid_outcome(isolated_submit_db):
 
     engine = init_db(str(isolated_submit_db))
     with Session(engine) as session:
-        assert session.query(Student).filter(Student.source == "USER_SUBMITTED").count() == 1
+        student = session.query(Student).filter(Student.source == "USER_SUBMITTED").one()
+        assert student.program_normalized == "Engineering"
 
 
 def test_submit_invalid_grade_rejected():
