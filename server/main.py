@@ -21,10 +21,12 @@ from core.profile_matcher import get_program_archetypes, match_profiles
 from core.profile_taxonomy import extract_activity_signals
 from core.recommend import find_similar, program_stats, list_programs
 from pipeline.normalize import normalize_school, normalize_decision, normalize_province
-from pipeline.program_names import normalize_program_name
+from pipeline.program_names import get_program_category, normalize_program_name
 from pipeline.extract_fields import tag_program, tag_ec
 from database.models import Student, init_db
 from sqlalchemy.orm import Session
+
+DB_PATH = str(Path(__file__).parent.parent / "database" / "unipath.db")
 
 app = FastAPI()
 
@@ -68,6 +70,14 @@ class CreateProfileRequest(BaseModel):
     province: Optional[str] = None
     curriculum_type: str = "UNKNOWN"
     activities_text: Optional[str] = None
+
+
+def _profile_db_path() -> str:
+    return DB_PATH
+
+
+def _grade_out_of_range(grade: Optional[float]) -> bool:
+    return grade is not None and not (50 <= grade <= 100)
 
 
 @app.get("/health")
@@ -131,7 +141,7 @@ def get_programs(category: str = None):
 
 @app.get("/programs/{school}/{program_name:path}/archetypes")
 def get_archetypes(school: str, program_name: str):
-    return get_program_archetypes("database/unipath.db", school, program_name)
+    return get_program_archetypes(_profile_db_path(), school, program_name)
 
 
 @app.get("/programs/{school}/{program_name:path}")
@@ -144,7 +154,9 @@ def get_program_stats(school: str, program_name: str):
 
 @app.post("/profile-match")
 def post_profile_match(req: ProfileMatchRequest):
-    return match_profiles("database/unipath.db", {
+    if _grade_out_of_range(req.grade_average):
+        return {"error": "grade_out_of_range"}
+    return match_profiles(_profile_db_path(), {
         "school": req.school,
         "program": req.program,
         "grade_average": req.grade_average,
@@ -155,10 +167,14 @@ def post_profile_match(req: ProfileMatchRequest):
 
 @app.post("/profiles")
 def create_profile(req: CreateProfileRequest):
+    if _grade_out_of_range(req.grade_average):
+        return {"error": "grade_out_of_range"}
     school_normalized, _ = normalize_school(req.school)
     if school_normalized is None:
         return {"error": "unknown_school"}
     program_normalized = normalize_program_name(req.program, school=school_normalized)
+    if get_program_category(program_normalized) == "OTHER":
+        return {"error": "unknown_program"}
     activities = extract_activity_signals(req.activities_text)
     return {
         "status": "ok",
