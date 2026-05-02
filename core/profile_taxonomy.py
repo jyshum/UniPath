@@ -3,8 +3,8 @@ import re
 
 def normalize_curriculum_type(text: str | None) -> str:
     value = (text or "").lower()
-    has_ib = "ib" in value or "international baccalaureate" in value
-    has_ap = "ap " in f"{value} " or "advanced placement" in value
+    has_ib = bool(re.search(r"\bib\b", value)) or "international baccalaureate" in value
+    has_ap = bool(re.search(r"\bap\b", value)) or "advanced placement" in value
     if has_ib and has_ap:
         return "MIXED"
     if has_ib:
@@ -70,25 +70,26 @@ def extract_activity_signals(text: str | None) -> list[dict]:
 
     signals = []
     rules = [
-        ("deca", "BUSINESS", "DECA", "HIGH", 0.9),
-        ("student council", "LEADERSHIP", "STUDENT_COUNCIL", "MEDIUM", 0.85),
-        ("business club", "BUSINESS", "BUSINESS_CLUB", "HIGH", 0.85),
-        ("hackathon", "STEM", "HACKATHON", "HIGH", 0.85),
-        ("robotics", "STEM", "ROBOTICS", "HIGH", 0.85),
-        ("science fair", "STEM", "SCIENCE_FAIR", "HIGH", 0.85),
-        ("hosa", "COMPETITION", "HOSA", "HIGH", 0.85),
-        ("debate", "COMPETITION", "DEBATE", "MEDIUM", 0.8),
-        ("model un", "COMPETITION", "MODEL_UN", "MEDIUM", 0.8),
-        ("varsity", "SPORTS", "VARSITY_SPORT", "MEDIUM", 0.8),
-        ("tutor", "COMMUNITY", "TUTORING", "MEDIUM", 0.75),
-        ("part-time", "WORK", "PAID_WORK", "LOW", 0.75),
-        ("research", "RESEARCH", "RESEARCH_INTERNSHIP", "HIGH", 0.8),
-        ("nonprofit", "ENTREPRENEURSHIP", "NONPROFIT", "HIGH", 0.8),
-        ("app", "STEM", "PERSONAL_PROJECT", "HIGH", 0.75),
+        (r"\bdeca\b", "BUSINESS", "DECA", "HIGH", 0.9),
+        (r"\bstudent\s+council\b", "LEADERSHIP", "STUDENT_COUNCIL", "MEDIUM", 0.85),
+        (r"\bbusiness\s+club\b", "BUSINESS", "BUSINESS_CLUB", "HIGH", 0.85),
+        (r"\bhackathon\b", "STEM", "HACKATHON", "HIGH", 0.85),
+        (r"\brobotics\b", "STEM", "ROBOTICS", "HIGH", 0.85),
+        (r"\bscience\s+fair\b", "STEM", "SCIENCE_FAIR", "HIGH", 0.85),
+        (r"\bhosa\b", "COMPETITION", "HOSA", "HIGH", 0.85),
+        (r"\bdebate\b", "COMPETITION", "DEBATE", "MEDIUM", 0.8),
+        (r"\bmodel\s+un\b", "COMPETITION", "MODEL_UN", "MEDIUM", 0.8),
+        (r"\bvarsity\b", "SPORTS", "VARSITY_SPORT", "MEDIUM", 0.8),
+        (r"\btutor\b", "COMMUNITY", "TUTORING", "MEDIUM", 0.75),
+        (r"\bpart-time\b", "WORK", "PAID_WORK", "LOW", 0.75),
+        (r"\bresearch\b", "RESEARCH", "RESEARCH_INTERNSHIP", "HIGH", 0.8),
+        (r"\bnonprofit\b", "ENTREPRENEURSHIP", "NONPROFIT", "HIGH", 0.8),
+        (r"\bapp\b", "STEM", "PERSONAL_PROJECT", "HIGH", 0.75),
     ]
 
-    for keyword, category, activity_type, relevance, confidence in rules:
-        if keyword in value:
+    seen_activity_types = set()
+    for pattern, category, activity_type, relevance, confidence in rules:
+        if activity_type not in seen_activity_types and re.search(pattern, value):
             signals.append({
                 "category": category,
                 "activity_type": activity_type,
@@ -99,7 +100,7 @@ def extract_activity_signals(text: str | None) -> list[dict]:
                 "program_relevance": relevance,
                 "source_confidence": confidence,
             })
-            break
+            seen_activity_types.add(activity_type)
 
     if not signals and raw:
         signals.append({
@@ -143,7 +144,7 @@ def extract_course_signals(text: str | None) -> list[dict]:
     for match in pattern.finditer(raw):
         ib_prefix, level_token, name, grade = match.groups()
         level_upper = (level_token or "").upper()
-        if ib_prefix and level_upper == "HL":
+        if level_upper == "HL":
             course_level = "IB_HL"
             confidence = 0.85
         elif level_upper == "SL":
