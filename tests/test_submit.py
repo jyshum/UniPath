@@ -1,11 +1,24 @@
 import pytest
 from fastapi.testclient import TestClient
+from sqlalchemy.orm import Session
+import server.main as server_main
+from database.models import Student, init_db
 from server.main import app
 
 client = TestClient(app)
 
 
-def test_submit_valid_outcome():
+@pytest.fixture(autouse=True)
+def isolated_submit_db(tmp_path, monkeypatch):
+    db_path = tmp_path / "submit.db"
+    init_db(str(db_path))
+    monkeypatch.setattr(server_main, "DB_PATH", str(db_path))
+    server_main._engine = None
+    yield db_path
+    server_main._engine = None
+
+
+def test_submit_valid_outcome(isolated_submit_db):
     """Valid submission returns success."""
     response = client.post("/submit-outcome", json={
         "school": "UBC",
@@ -16,6 +29,10 @@ def test_submit_valid_outcome():
     assert response.status_code == 200
     data = response.json()
     assert data["status"] == "ok"
+
+    engine = init_db(str(isolated_submit_db))
+    with Session(engine) as session:
+        assert session.query(Student).filter(Student.source == "USER_SUBMITTED").count() == 1
 
 
 def test_submit_invalid_grade_rejected():

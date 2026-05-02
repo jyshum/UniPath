@@ -200,7 +200,7 @@ _engine = None
 def _get_engine():
     global _engine
     if _engine is None:
-        _engine = init_db()
+        _engine = init_db(DB_PATH)
     return _engine
 
 
