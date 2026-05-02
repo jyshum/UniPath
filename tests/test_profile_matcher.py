@@ -9,6 +9,20 @@ from database.models import (
 
 
 def _profile(session, *, decision, grade, activity_type, category="BUSINESS", role="MEMBER"):
+    profile = _profile_without_activity(session, decision=decision, grade=grade)
+    session.add(ApplicantActivity(
+        profile_id=profile.id,
+        category=category,
+        activity_type=activity_type,
+        role_level=role,
+        achievement_level="PROVINCIAL" if role == "PRESIDENT" else "LOCAL",
+        program_relevance="HIGH",
+        source_confidence=0.9,
+    ))
+    return profile
+
+
+def _profile_without_activity(session, *, decision, grade):
     profile = ApplicantProfile(
         source="USER_SUBMITTED",
         source_confidence=0.95,
@@ -26,15 +40,6 @@ def _profile(session, *, decision, grade, activity_type, category="BUSINESS", ro
     )
     session.add(profile)
     session.flush()
-    session.add(ApplicantActivity(
-        profile_id=profile.id,
-        category=category,
-        activity_type=activity_type,
-        role_level=role,
-        achievement_level="PROVINCIAL" if role == "PRESIDENT" else "LOCAL",
-        program_relevance="HIGH",
-        source_confidence=0.9,
-    ))
     return profile
 
 
@@ -89,3 +94,56 @@ def test_archetypes_hide_low_support_groups(tmp_path):
             "confidence_label": "medium",
         }
     ]
+
+
+def test_match_profiles_confidence_is_low_when_only_one_profile_is_ec_rich(tmp_path):
+    db_path = tmp_path / "low_ec_support.db"
+    engine = init_db(str(db_path))
+    with Session(engine) as session:
+        _profile(session, decision="ACCEPTED", grade=94, activity_type="DECA")
+        _profile_without_activity(session, decision="ACCEPTED", grade=92)
+        _profile_without_activity(session, decision="REJECTED", grade=90)
+        session.commit()
+
+    result = match_profiles(
+        str(db_path),
+        {
+            "school": "UBC Vancouver",
+            "program": "Commerce",
+            "grade_average": 93,
+            "curriculum_type": "REGULAR",
+            "activities": [],
+        },
+    )
+
+    assert result["data_confidence"]["label"] == "low"
+    assert result["data_confidence"]["total_profiles"] == 3
+    assert result["data_confidence"]["ec_rich_profiles"] == 1
+
+
+def test_match_profiles_confidence_is_low_when_large_program_has_no_ec_rich_profiles(tmp_path):
+    db_path = tmp_path / "low_large_no_ec.db"
+    engine = init_db(str(db_path))
+    with Session(engine) as session:
+        for index in range(20):
+            _profile_without_activity(
+                session,
+                decision="ACCEPTED" if index % 2 == 0 else "REJECTED",
+                grade=80 + index,
+            )
+        session.commit()
+
+    result = match_profiles(
+        str(db_path),
+        {
+            "school": "UBC Vancouver",
+            "program": "Commerce",
+            "grade_average": 93,
+            "curriculum_type": "REGULAR",
+            "activities": [],
+        },
+    )
+
+    assert result["data_confidence"]["label"] == "low"
+    assert result["data_confidence"]["total_profiles"] == 20
+    assert result["data_confidence"]["ec_rich_profiles"] == 0

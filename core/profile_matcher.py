@@ -16,7 +16,15 @@ _LEADERSHIP_ROLES = {
 }
 
 
-def _confidence_label(support_count: int) -> str:
+def _confidence_label(total_profiles: int, ec_rich_profiles: int) -> str:
+    if total_profiles >= 20 and ec_rich_profiles >= 10:
+        return "high"
+    if total_profiles >= 3 and ec_rich_profiles >= 2:
+        return "medium"
+    return "low"
+
+
+def _support_confidence_label(support_count: int) -> str:
     if support_count >= 10:
         return "high"
     if support_count >= 2:
@@ -159,7 +167,7 @@ def match_profiles(db_path: str, query: dict) -> dict:
         "school": school,
         "program": program,
         "data_confidence": {
-            "label": _confidence_label(len(profiles)),
+            "label": _confidence_label(len(profiles), ec_rich_profiles),
             "total_profiles": len(profiles),
             "ec_rich_profiles": ec_rich_profiles,
         },
@@ -232,7 +240,7 @@ def get_program_archetypes(
                     {activity.activity_type for activity in profile_activities}
                 ),
                 "common_role_levels": sorted({role for role in roles}),
-                "confidence_label": _confidence_label(len(profile_ids)),
+                "confidence_label": _support_confidence_label(len(profile_ids)),
             }
         )
 
