@@ -17,8 +17,11 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
 from core.calibrate import final_probability, ADMITTED_PROFILES
+from core.profile_matcher import get_program_archetypes, match_profiles
+from core.profile_taxonomy import extract_activity_signals
 from core.recommend import find_similar, program_stats, list_programs
 from pipeline.normalize import normalize_school, normalize_decision, normalize_province
+from pipeline.program_names import normalize_program_name
 from pipeline.extract_fields import tag_program, tag_ec
 from database.models import Student, init_db
 from sqlalchemy.orm import Session
@@ -41,6 +44,30 @@ class ProbabilityRequest(BaseModel):
     supplemental_texts: dict[str, str] = {}
     supplemental_completed: dict[str, bool] = {}
     activities: list[str] = []
+
+
+class ActivityInput(BaseModel):
+    category: Optional[str] = None
+    activity_type: Optional[str] = None
+    role_level: Optional[str] = None
+
+
+class ProfileMatchRequest(BaseModel):
+    school: str
+    program: str
+    grade_average: Optional[float] = None
+    curriculum_type: str = "UNKNOWN"
+    activities: list[ActivityInput] = []
+
+
+class CreateProfileRequest(BaseModel):
+    school: str
+    program: str
+    grade_average: Optional[float] = None
+    decision: Optional[Literal["ACCEPTED", "REJECTED", "WAITLISTED", "DEFERRED"]] = None
+    province: Optional[str] = None
+    curriculum_type: str = "UNKNOWN"
+    activities_text: Optional[str] = None
 
 
 @app.get("/health")
@@ -102,12 +129,44 @@ def get_programs(category: str = None):
     return list_programs(min_records=10, category=category)
 
 
+@app.get("/programs/{school}/{program_name:path}/archetypes")
+def get_archetypes(school: str, program_name: str):
+    return get_program_archetypes("database/unipath.db", school, program_name)
+
+
 @app.get("/programs/{school}/{program_name:path}")
 def get_program_stats(school: str, program_name: str):
     result = program_stats(school, program_name)
     if isinstance(result, dict) and result.get("error"):
         return result
     return result
+
+
+@app.post("/profile-match")
+def post_profile_match(req: ProfileMatchRequest):
+    return match_profiles("database/unipath.db", {
+        "school": req.school,
+        "program": req.program,
+        "grade_average": req.grade_average,
+        "curriculum_type": req.curriculum_type,
+        "activities": [activity.model_dump() for activity in req.activities],
+    })
+
+
+@app.post("/profiles")
+def create_profile(req: CreateProfileRequest):
+    school_normalized, _ = normalize_school(req.school)
+    if school_normalized is None:
+        return {"error": "unknown_school"}
+    program_normalized = normalize_program_name(req.program, school=school_normalized)
+    activities = extract_activity_signals(req.activities_text)
+    return {
+        "status": "ok",
+        "normalized_school": school_normalized,
+        "normalized_program": program_normalized,
+        "activity_count": len(activities),
+        "activities": activities,
+    }
 
 
 class SubmitOutcomeRequest(BaseModel):
