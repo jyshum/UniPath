@@ -108,3 +108,36 @@ def test_upsert_profile_for_student_is_idempotent(tmp_path):
         assert session.query(ApplicantActivity).count() == 1
         assert session.query(ApplicantCourse).count() == 1
         assert session.query(ApplicantProfile).first().source_student_id == student_id
+
+
+from scripts.backfill_applicant_profiles import backfill_applicant_profiles
+
+
+def test_backfill_applicant_profiles_skips_incomplete_rows(tmp_path):
+    db_path = tmp_path / "profiles.db"
+    engine = init_db(str(db_path))
+
+    with Session(engine) as session:
+        session.add_all([
+            Student(
+                source="BC_2025",
+                school_normalized="UBC Vancouver",
+                program_normalized="Science",
+                program_category="SCIENCE",
+                decision="ACCEPTED",
+                core_avg=93.0,
+                ec_raw="Science fair award",
+            ),
+            Student(
+                source="BC_2025",
+                school_normalized=None,
+                program_normalized="Science",
+                decision="ACCEPTED",
+                core_avg=90.0,
+            ),
+        ])
+        session.commit()
+
+    summary = backfill_applicant_profiles(str(db_path))
+
+    assert summary == {"checked": 2, "created_or_updated": 1, "skipped": 1}
