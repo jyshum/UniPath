@@ -6,7 +6,7 @@ Students browse real admitted student data by school and program — grade distr
 
 **Core differentiator:** real student submission data, not synthetic or generic LLM advice.
 
-**Live at:** https://uni-path-nine.vercel.app | Private repo: https://github.com/jyshum/UniPath
+Currently not live due to lack of usable data — an ongoing problem.
 
 ---
 
